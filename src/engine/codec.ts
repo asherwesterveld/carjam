@@ -37,7 +37,7 @@ export function encodeBoard(board: Board): string {
 
   const raw = bits.toString(36).toUpperCase();
   const grouped = raw.match(/.{1,4}/g)?.join('-') ?? raw;
-  return `RH-${grouped}`;
+  return grouped;
 }
 
 /**

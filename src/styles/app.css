@@ -1584,10 +1584,10 @@ body {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 7.5px;
   font-weight: 700;
-  opacity: 0.85;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  opacity: 0.9;
+  line-height: 1.25;
+  white-space: normal;
+  word-break: break-all;
 }
 
 .rh-card-svg {

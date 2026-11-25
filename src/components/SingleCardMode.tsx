@@ -487,7 +487,7 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
             <form onSubmit={handleLookupSubmit} className="single-lookup-form">
               <input
                 type="text"
-                placeholder="Paste code (RH-...) or URL"
+                placeholder="Paste puzzle code or URL"
                 value={lookupInput}
                 onChange={(e) => {
                   setLookupInput(e.target.value);

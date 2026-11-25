@@ -108,7 +108,10 @@
   }
 
   .rh-card-print .rh-card-unified-code {
-    font-size: 5pt !important;
+    font-size: 4.8pt !important;
+    line-height: 1.2 !important;
+    white-space: normal !important;
+    word-break: break-all !important;
   }
 
   .rh-card-print .rh-card-back-header {

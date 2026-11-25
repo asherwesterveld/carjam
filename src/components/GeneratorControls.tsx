@@ -332,7 +332,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
         <form onSubmit={handleLookupSubmit} className="lookup-form">
           <input
             type="text"
-            placeholder="RH-XXXX-XXXX..."
+            placeholder="XXXX-XXXX-XXXX..."
             value={lookupInput}
             onChange={(e) => {
               setLookupInput(e.target.value);

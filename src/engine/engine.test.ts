@@ -62,12 +62,16 @@ describe('Rush Hour Engine', () => {
 
   it('round-trips board codes losslessly and rejects corrupted codes', () => {
     const code = encodeBoard(CLASSIC_CARD_1);
-    expect(code.startsWith('RH-')).toBe(true);
+    expect(code.startsWith('RH-')).toBe(false);
+    expect(code).toMatch(/^[0-9A-Z-]+$/);
 
     const decoded = decodeBoard(code);
     expect(decoded).not.toBeNull();
     expect(canonicalBoardKey(decoded!)).toBe(canonicalBoardKey(CLASSIC_CARD_1));
     expect(solveBoard(decoded!).moveCount).toBe(8);
+
+    // Backward-compatible decoding of legacy RH- prefixed codes
+    expect(decodeBoard(`RH-${code}`)).not.toBeNull();
 
     // Corrupted checksum should fail
     const badCode = code.slice(0, -1) + (code.endsWith('A') ? 'B' : 'A');
