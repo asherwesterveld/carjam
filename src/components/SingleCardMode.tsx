@@ -62,12 +62,14 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
   const [showLookup, setShowLookup] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [solvedCopied, setSolvedCopied] = useState(false);
 
   if (card && card.id !== lastCardId) {
     setLastCardId(card.id);
     setPlayBoard(card.board);
     setPlayerMoves(0);
     setHighlightedId(undefined);
+    setSolvedCopied(false);
   }
 
   const displayedBoard = playBoard ?? card?.board ?? null;
@@ -119,6 +121,30 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
     setPlayBoard(applyMove(displayedBoard, nextMove));
     setPlayerMoves((m) => m + 1);
     setHighlightedId(nextMove.vehicleId);
+  };
+
+  const handleSolvedShare = async () => {
+    if (!card || !diff) return;
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: `Car Jam (${card.moveCount} Moves)`,
+          text: `I solved this ${diff.label} Car Jam puzzle in ${playerMoves} moves (optimal: ${card.moveCount})! Try to beat it:`,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // User cancelled native share sheet
+        return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setSolvedCopied(true);
+      window.setTimeout(() => setSolvedCopied(false), 1800);
+    } catch {
+      // Clipboard unavailable
+    }
   };
 
   const handleLookupSubmit = (e: React.FormEvent) => {
@@ -338,9 +364,9 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={() => setShowShare(true)}
+                    onClick={handleSolvedShare}
                   >
-                    Share
+                    {solvedCopied ? '✓ Copied' : 'Share'}
                   </button>
                   <button
                     type="button"
