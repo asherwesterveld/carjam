@@ -397,7 +397,7 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
                     className="btn btn-primary"
                     onClick={onGenerateOne}
                   >
-                    New Card
+                    New Game
                   </button>
                 </div>
               </div>
@@ -418,7 +418,7 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
               <p>
                 {isGenerating
                   ? 'Generating your Car Jam board…'
-                  : 'Tap New Card to generate a puzzle.'}
+                  : 'Tap New Game to generate a puzzle.'}
               </p>
             </div>
           )}
@@ -467,7 +467,7 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
                 className="btn btn-primary"
                 onClick={onGenerateOne}
               >
-                New Card
+                New Game
               </button>
             )}
           </div>

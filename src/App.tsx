@@ -318,7 +318,7 @@ export const App: React.FC = () => {
       {/* Top Mode Switcher Bar */}
       <header className="top-nav no-print">
         <div className="top-nav-brand">
-          <img src="./logo.png" alt="Car Jam logo" className="brand-logo sm" />
+          <img src="./logo.svg" alt="Car Jam logo" className="brand-logo sm" />
           <span className="top-nav-title">Car Jam</span>
         </div>
 
