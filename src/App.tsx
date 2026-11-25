@@ -73,7 +73,6 @@ export const App: React.FC = () => {
   const [duplexFlip, setDuplexFlip] = useState<DuplexFlip>('long-edge');
   const [duplexOffsetYmm, setDuplexOffsetYmm] = useState(0);
   const [paperSize, setPaperSize] = useState<PaperSize>('letter');
-  const [showCropMarks, setShowCropMarks] = useState(true);
   const [showQrCodes, setShowQrCodes] = useState(true);
   const [qrBaseUrl, setQrBaseUrl] = useState<string>(() => {
     try {
@@ -487,15 +486,6 @@ export const App: React.FC = () => {
                 <label className="crop-check">
                   <input
                     type="checkbox"
-                    checked={showCropMarks}
-                    onChange={(e) => setShowCropMarks(e.target.checked)}
-                  />
-                  <span>Crop marks</span>
-                </label>
-
-                <label className="crop-check">
-                  <input
-                    type="checkbox"
                     checked={showQrCodes}
                     onChange={(e) => setShowQrCodes(e.target.checked)}
                   />
@@ -604,7 +594,6 @@ export const App: React.FC = () => {
         duplexFlip={duplexFlip}
         duplexOffsetYmm={duplexOffsetYmm}
         paperSize={paperSize}
-        showCropMarks={showCropMarks}
       />
     </div>
   );

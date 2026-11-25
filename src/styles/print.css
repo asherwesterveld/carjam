@@ -74,12 +74,6 @@
     height: 87mm;
   }
 
-  /* Subtle cut-guide borders when crop marks are enabled */
-  .print-grid-3x3.with-crops .print-slot {
-    outline: 0.2mm dashed #94a3b8;
-    outline-offset: -0.1mm;
-  }
-
   /* Exact physical 56x87 mm ThinkFun Rush Hour card dimensions */
   .rh-card.rh-card-print {
     width: 56mm !important;

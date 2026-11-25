@@ -13,7 +13,6 @@ interface PrintSheetProps {
   duplexOffsetYmm?: number;
   duplexOffsetXmm?: number;
   paperSize: PaperSize;
-  showCropMarks: boolean;
 }
 
 export function buildCardQrUrl(baseUrl: string | undefined, code: string): string | undefined {
@@ -69,7 +68,6 @@ export const PrintSheet: React.FC<PrintSheetProps> = ({
   duplexOffsetYmm = 0,
   duplexOffsetXmm = 0,
   paperSize,
-  showCropMarks,
 }) => {
   if (cards.length === 0) return null;
 
@@ -92,7 +90,7 @@ export const PrintSheet: React.FC<PrintSheetProps> = ({
         frontPages.map((pageCards, pageIdx) => (
           <section key={`front-${pageIdx}`} className="print-page">
             <div
-              className={`print-grid-3x3 ${showCropMarks ? 'with-crops' : ''}`}
+              className="print-grid-3x3"
             >
               {Array.from({ length: CARDS_PER_SHEET }).map((_, slotIdx) => {
                 const card = pageCards[slotIdx];
@@ -123,9 +121,7 @@ export const PrintSheet: React.FC<PrintSheetProps> = ({
               {/* Front sheet */}
               <section className="print-page">
                 <div
-                  className={`print-grid-3x3 ${
-                    showCropMarks ? 'with-crops' : ''
-                  }`}
+                  className="print-grid-3x3"
                 >
                   {Array.from({ length: CARDS_PER_SHEET }).map((_, slotIdx) => {
                     const card = pageCards[slotIdx];
@@ -150,9 +146,7 @@ export const PrintSheet: React.FC<PrintSheetProps> = ({
               {/* Mirrored solution back sheet */}
               <section className="print-page">
                 <div
-                  className={`print-grid-3x3 ${
-                    showCropMarks ? 'with-crops' : ''
-                  }`}
+                  className="print-grid-3x3"
                   style={backOffsetStyle}
                 >
                   {backSlots.map((card, slotIdx) => (
@@ -175,9 +169,7 @@ export const PrintSheet: React.FC<PrintSheetProps> = ({
           {frontPages.map((pageCards, pageIdx) => (
             <section key={`ak-front-${pageIdx}`} className="print-page">
               <div
-                className={`print-grid-3x3 ${
-                  showCropMarks ? 'with-crops' : ''
-                }`}
+                className="print-grid-3x3"
               >
                 {Array.from({ length: CARDS_PER_SHEET }).map((_, slotIdx) => {
                   const card = pageCards[slotIdx];
@@ -202,9 +194,7 @@ export const PrintSheet: React.FC<PrintSheetProps> = ({
           {frontPages.map((pageCards, pageIdx) => (
             <section key={`ak-back-${pageIdx}`} className="print-page">
               <div
-                className={`print-grid-3x3 ${
-                  showCropMarks ? 'with-crops' : ''
-                }`}
+                className="print-grid-3x3"
               >
                 {Array.from({ length: CARDS_PER_SHEET }).map((_, slotIdx) => {
                   const card = pageCards[slotIdx];
