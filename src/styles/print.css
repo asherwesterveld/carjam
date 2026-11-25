@@ -89,8 +89,10 @@
   }
 
   .rh-card-print .rh-card-unified-footer {
+    height: 17.5mm !important;
     padding: 2.2mm 2.4mm !important;
     gap: 2mm !important;
+    box-sizing: border-box !important;
   }
 
   .rh-card-print .rh-card-tier-name {

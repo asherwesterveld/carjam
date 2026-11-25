@@ -1553,6 +1553,7 @@ body {
 }
 
 .rh-card-unified-footer {
+  height: 66px;
   padding: 9px 10px;
   color: #ffffff;
   display: flex;
@@ -1560,6 +1561,7 @@ body {
   justify-content: space-between;
   gap: 8px;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .rh-card-unified-left {
