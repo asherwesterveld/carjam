@@ -52,19 +52,30 @@ function getInitialModeFromPath(): AppMode {
 }
 
 export const App: React.FC = () => {
+  const [initialUrlCard] = useState<PuzzleCard | null>(loadInitialCardFromUrl);
   const [appMode, setAppMode] = useState<AppMode>(getInitialModeFromPath);
 
-  // Shared generator settings (default: Intermediate 11–18 moves)
+  // Shared generator settings (default: Intermediate 11–18 moves, or matched to URL card)
   const [moveMode, setMoveMode] = useState<MoveMode>('range');
-  const [exactMoves, setExactMoves] = useState(14);
-  const [minMoves, setMinMoves] = useState(11);
-  const [maxMoves, setMaxMoves] = useState(18);
+  const [exactMoves, setExactMoves] = useState(() => initialUrlCard?.moveCount ?? 14);
+  const [minMoves, setMinMoves] = useState(() => {
+    if (!initialUrlCard) return 11;
+    const meta = DIFFICULTY_META[initialUrlCard.difficulty];
+    return Math.min(meta.minMoves, initialUrlCard.moveCount);
+  });
+  const [maxMoves, setMaxMoves] = useState(() => {
+    if (!initialUrlCard) return 18;
+    const meta = DIFFICULTY_META[initialUrlCard.difficulty];
+    return Math.max(meta.maxMoves, initialUrlCard.moveCount);
+  });
   const [count, setCount] = useState(9);
   const [showLetters, setShowLetters] = useState(false);
 
   // Single-card companion state
-  const [singleCard, setSingleCard] = useState<PuzzleCard | null>(null);
+  const [singleCard, setSingleCard] = useState<PuzzleCard | null>(initialUrlCard);
   const singleSeenKeysRef = useRef<Set<string>>(new Set());
+  // Incremented ONLY when the user manually edits move controls in Single Card mode
+  const [autoGenTick, setAutoGenTick] = useState(0);
 
   // Bulk deck state
   const [cards, setCards] = useState<PuzzleCard[]>([]);
@@ -102,21 +113,35 @@ export const App: React.FC = () => {
   const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
   const requestTargetRef = useRef<AppMode>('single');
-  const lastAutoSpecRef = useRef<string>(
-    `${moveMode}:${exactMoves}:${minMoves}:${maxMoves}`
-  );
 
   const syncControlsToCard = useCallback((card: PuzzleCard) => {
     const tierMeta = DIFFICULTY_META[card.difficulty];
     const nextMin = Math.min(tierMeta.minMoves, card.moveCount);
     const nextMax = Math.max(tierMeta.maxMoves, card.moveCount);
-    // Update lastAutoSpecRef first so syncing controls to a loaded/shared card
-    // does NOT trigger auto-generation and overwrite the shared board!
-    lastAutoSpecRef.current = `range:${card.moveCount}:${nextMin}:${nextMax}`;
     setMoveMode('range');
     setExactMoves(card.moveCount);
     setMinMoves(nextMin);
     setMaxMoves(nextMax);
+  }, []);
+
+  const handleSingleSetMoveMode = useCallback((m: MoveMode) => {
+    setMoveMode(m);
+    setAutoGenTick((t) => t + 1);
+  }, []);
+
+  const handleSingleSetExactMoves = useCallback((n: number) => {
+    setExactMoves(n);
+    setAutoGenTick((t) => t + 1);
+  }, []);
+
+  const handleSingleSetMinMoves = useCallback((n: number) => {
+    setMinMoves(n);
+    setAutoGenTick((t) => t + 1);
+  }, []);
+
+  const handleSingleSetMaxMoves = useCallback((n: number) => {
+    setMaxMoves(n);
+    setAutoGenTick((t) => t + 1);
   }, []);
 
   useEffect(() => {
@@ -151,14 +176,8 @@ export const App: React.FC = () => {
 
     workerRef.current = worker;
 
-    // If opened via a scanned QR code (?code=...), load that exact card immediately
-    const urlCard = loadInitialCardFromUrl();
-    if (urlCard) {
-      setSingleCard(urlCard);
-      syncControlsToCard(urlCard);
-      setAppMode('single');
-    } else {
-      // Auto-generate 1 starter Intermediate card on mount (StrictMode-safe)
+    // Only auto-generate a starter card if not opened via a QR/share link (?code=...)
+    if (!initialUrlCard) {
       const reqId = ++requestIdRef.current;
       requestTargetRef.current = 'single';
       setIsGenerating(true);
@@ -179,7 +198,7 @@ export const App: React.FC = () => {
       worker.terminate();
       workerRef.current = null;
     };
-  }, []);
+  }, [initialUrlCard]);
 
   const generateSingleCard = useCallback(() => {
     if (!workerRef.current) return;
@@ -208,19 +227,17 @@ export const App: React.FC = () => {
     } satisfies WorkerRequest);
   }, [exactMoves, maxMoves, minMoves, moveMode]);
 
-  // Auto-generate a new single card whenever the user changes move mode, exact moves, or range
+  // Auto-generate a new single card ONLY when the user edits move controls
   useEffect(() => {
-    const spec = `${moveMode}:${exactMoves}:${minMoves}:${maxMoves}`;
-    if (spec === lastAutoSpecRef.current) return;
-    lastAutoSpecRef.current = spec;
-    if (appMode !== 'single') return;
+    if (autoGenTick === 0 || appMode !== 'single') return;
 
     const timer = window.setTimeout(() => {
       generateSingleCard();
     }, 300);
 
     return () => window.clearTimeout(timer);
-  }, [appMode, moveMode, exactMoves, minMoves, maxMoves, generateSingleCard]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoGenTick]);
 
   const startBulkGeneration = useCallback(
     (append: boolean) => {
@@ -308,6 +325,15 @@ export const App: React.FC = () => {
       difficulty: getDifficultyTier(sol.moveCount),
     };
     if (appMode === 'single') {
+      // Cancel any in-flight generation so it cannot overwrite the loaded puzzle
+      if (workerRef.current && isGenerating) {
+        workerRef.current.postMessage({
+          type: 'cancel',
+          requestId: requestIdRef.current,
+        } satisfies WorkerRequest);
+      }
+      requestIdRef.current += 1;
+      setIsGenerating(false);
       setSingleCard(card);
       syncControlsToCard(card);
     } else {
@@ -377,13 +403,13 @@ export const App: React.FC = () => {
               : ''
           }
           moveMode={moveMode}
-          setMoveMode={setMoveMode}
+          setMoveMode={handleSingleSetMoveMode}
           exactMoves={exactMoves}
-          setExactMoves={setExactMoves}
+          setExactMoves={handleSingleSetExactMoves}
           minMoves={minMoves}
-          setMinMoves={setMinMoves}
+          setMinMoves={handleSingleSetMinMoves}
           maxMoves={maxMoves}
-          setMaxMoves={setMaxMoves}
+          setMaxMoves={handleSingleSetMaxMoves}
           isGenerating={isGenerating}
           onGenerateOne={generateSingleCard}
           onCancel={cancelGeneration}
