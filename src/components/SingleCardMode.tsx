@@ -53,6 +53,8 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
 }) => {
   const [playBoard, setPlayBoard] = useState<Board | null>(null);
   const [playerMoves, setPlayerMoves] = useState(0);
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const [viewedSolution, setViewedSolution] = useState(false);
   const [highlightedId, setHighlightedId] = useState<VehicleId | undefined>(
     undefined
   );
@@ -68,6 +70,8 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
     setLastCardId(card.id);
     setPlayBoard(card.board);
     setPlayerMoves(0);
+    setHintsUsed(0);
+    setViewedSolution(false);
     setHighlightedId(undefined);
     setSolvedCopied(false);
   }
@@ -94,6 +98,8 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
     if (!card) return;
     setPlayBoard(card.board);
     setPlayerMoves(0);
+    setHintsUsed(0);
+    setViewedSolution(false);
     setHighlightedId(undefined);
   };
 
@@ -120,7 +126,30 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
 
     setPlayBoard(applyMove(displayedBoard, nextMove));
     setPlayerMoves((m) => m + 1);
+    setHintsUsed((h) => h + 1);
     setHighlightedId(nextMove.vehicleId);
+  };
+
+  const handleOpenSolutionClick = () => {
+    if (!card) return;
+    setViewedSolution(true);
+    onOpenSolution(card);
+  };
+
+  const getSneakyRemark = (): string => {
+    if (viewedSolution && hintsUsed > 0) {
+      return `(only peeked at the solution 👀 and ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'})`;
+    }
+    if (viewedSolution) {
+      return `(definitely didn't peek at the solution 👀)`;
+    }
+    if (hintsUsed === 1) {
+      return `(with just 1 tiny hint 😉)`;
+    }
+    if (hintsUsed > 1) {
+      return `(with a little help from ${hintsUsed} hints 😉)`;
+    }
+    return `(zero hints! 🧠)`;
   };
 
   const copyFallback = async (text: string) => {
@@ -150,7 +179,8 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
 
   const handleSolvedShare = async () => {
     if (!card || !diff) return;
-    const shareText = `I solved this ${diff.label} Car Jam puzzle in ${playerMoves} moves (optimal: ${card.moveCount})! Try to beat it:`;
+    const remark = getSneakyRemark();
+    const shareText = `I solved this ${diff.label} Car Jam puzzle in ${playerMoves} moves (optimal: ${card.moveCount}) ${remark} — try to beat it:`;
 
     if (typeof navigator.share === 'function') {
       try {
@@ -359,10 +389,13 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
                     </h3>
                     <p className="solved-sub">
                       Optimal: {card.moveCount} moves
-                      {isOptimalSolve && (
+                      {isOptimalSolve && !viewedSolution && hintsUsed === 0 && (
                         <span className="solved-optimal-pill">★ Optimal!</span>
                       )}
                     </p>
+                    {(hintsUsed > 0 || viewedSolution) && (
+                      <p className="solved-sneaky">{getSneakyRemark()}</p>
+                    )}
                   </div>
                 </div>
 
@@ -448,7 +481,7 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() => card && onOpenSolution(card)}
+              onClick={handleOpenSolutionClick}
               disabled={!card || isGenerating}
             >
               ▶ Solution
