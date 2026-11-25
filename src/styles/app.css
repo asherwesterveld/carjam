@@ -1460,11 +1460,15 @@ body {
 
 .rh-card-footer-center {
   justify-content: center;
+  text-align: center;
 }
 
 .rh-card-footer-center .rh-card-code {
   flex: 0 1 auto;
   text-align: center;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 1.25;
 }
 
 .rh-card-header {
