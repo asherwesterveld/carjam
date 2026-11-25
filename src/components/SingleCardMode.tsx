@@ -3,8 +3,9 @@ import { DIFFICULTY_META, HERO_ID, applyMove } from '../engine/catalog';
 import { solveBoard } from '../engine/solver';
 import type { Board, DifficultyTier, PuzzleCard, VehicleId } from '../engine/types';
 import type { MoveMode } from './GeneratorControls';
-import { BoardSvg } from './RushHourCard';
+import { QrCodeSvg } from './QrCodeSvg';
 import { QrScannerModal } from './QrScannerModal';
+import { BoardSvg } from './RushHourCard';
 import { ShareCardModal } from './ShareCardModal';
 
 interface SingleCardModeProps {
@@ -50,7 +51,6 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
   onOpenSolution,
   onLookupCode,
 }) => {
-  // Playable board state
   const [playBoard, setPlayBoard] = useState<Board | null>(null);
   const [playerMoves, setPlayerMoves] = useState(0);
   const [highlightedId, setHighlightedId] = useState<VehicleId | undefined>(
@@ -73,6 +73,7 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
   const displayedBoard = playBoard ?? card?.board ?? null;
   const heroCar = displayedBoard?.vehicles.find((v) => v.id === HERO_ID);
   const isSolved = heroCar?.col === 4;
+  const isOptimalSolve = Boolean(card && isSolved && playerMoves === card.moveCount);
 
   const diff = card ? DIFFICULTY_META[card.difficulty] : null;
 
@@ -109,13 +110,10 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
     setHighlightedId(undefined);
   };
 
-  // Live Hint: solves from the user's EXACT current board state and animates the next optimal move!
   const handleHint = () => {
     if (!card || !displayedBoard || isSolved) return;
     const nextMove =
-      playerMoves === 0
-        ? card.moves[0]
-        : solveBoard(displayedBoard).moves[0];
+      playerMoves === 0 ? card.moves[0] : solveBoard(displayedBoard).moves[0];
     if (!nextMove) return;
 
     setPlayBoard(applyMove(displayedBoard, nextMove));
@@ -139,9 +137,13 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
   return (
     <main className="single-mode no-print">
       <div className="single-container">
-        {/* Compact 2-row Difficulty & Move Selector */}
+        {/* Controls (top on mobile, left sidebar on laptop/landscape iPad) */}
         <section className="single-controls-card">
-          <div className="single-presets" role="group" aria-label="Difficulty presets">
+          <div
+            className="single-presets"
+            role="group"
+            aria-label="Difficulty presets"
+          >
             {TIERS.map(({ tier, shortLabel }) => {
               const meta = DIFFICULTY_META[tier];
               const active =
@@ -157,7 +159,10 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
                   onClick={() => applyPreset(tier)}
                   title={`${meta.label} (${meta.minMoves}–${meta.maxMoves} moves)`}
                 >
-                  <span className="preset-dot" style={{ background: meta.color }} />
+                  <span
+                    className="preset-dot"
+                    style={{ background: meta.color }}
+                  />
                   <span className="preset-full">
                     {meta.label === 'GRAND MASTER'
                       ? 'Grand Master'
@@ -260,110 +265,83 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
           </div>
         </section>
 
-        {/* Main Physical-Board Companion Card (fills remaining viewport height) */}
-        <section className="single-stage-card">
-          {card && displayedBoard && diff ? (
+        {/* Card Difficulty & Move Counter Banner */}
+        <section
+          className="single-card-banner"
+          style={{ backgroundColor: diff?.color ?? '#334155' }}
+        >
+          {card && diff ? (
             <>
-              <div
-                className="single-card-banner"
-                style={{ backgroundColor: diff.color }}
-              >
-                <div className="single-banner-left">
-                  <span className="single-tier-label">{diff.label}</span>
-                  <span className="single-pieces-tag">
-                    {card.board.vehicles.length} pcs
-                  </span>
-                </div>
-                <div className="single-moves-badge">
-                  {playerMoves > 0
-                    ? `${playerMoves} / ${card.moveCount} MOVES`
-                    : `${card.moveCount} MOVES`}
-                </div>
+              <div className="single-banner-left">
+                <span className="single-tier-label">{diff.label}</span>
+                <span className="single-pieces-tag">
+                  {card.board.vehicles.length} pcs
+                </span>
               </div>
+              <div className="single-moves-badge">
+                {playerMoves > 0
+                  ? `${playerMoves} / ${card.moveCount} MOVES`
+                  : `${card.moveCount} MOVES`}
+              </div>
+            </>
+          ) : (
+            <span className="single-tier-label">CAR JAM</span>
+          )}
+        </section>
 
-              <div className="single-board-area">
-                {isGenerating && (
-                  <div className="single-loading-overlay">
-                    <span>Generating live puzzle…</span>
+        {/* Main Playable 6x6 Board (fills full vertical space on laptop/iPad) */}
+        <section className="single-board-area">
+          {isGenerating && (
+            <div className="single-loading-overlay">
+              <span>Generating live puzzle…</span>
+            </div>
+          )}
+
+          {card && isSolved && !isGenerating && (
+            <div className="single-solved-overlay">
+              <div className="solved-card">
+                <div className="solved-header">
+                  <span className="solved-emoji">🎉</span>
+                  <div>
+                    <h3>
+                      Solved in {playerMoves} move
+                      {playerMoves === 1 ? '' : 's'}!
+                    </h3>
+                    <p className="solved-sub">
+                      Optimal: {card.moveCount} moves
+                      {isOptimalSolve && (
+                        <span className="solved-optimal-pill">★ Optimal!</span>
+                      )}
+                    </p>
                   </div>
-                )}
-                {isSolved && !isGenerating && (
-                  <div className="single-solved-overlay">
-                    <div className="solved-card">
-                      <span className="solved-emoji">🎉</span>
-                      <strong>
-                        Solved in {playerMoves} move
-                        {playerMoves === 1 ? '' : 's'}!
-                      </strong>
-                      <span className="solved-sub">
-                        Optimal: {card.moveCount} moves
-                      </span>
-                      <div className="solved-actions">
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          onClick={handleResetBoard}
-                        >
-                          Replay
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-primary btn-sm"
-                          onClick={onGenerateOne}
-                        >
-                          New Card
-                        </button>
-                      </div>
+                </div>
+
+                {shareUrl && (
+                  <div className="solved-qr-section">
+                    <div className="solved-qr-frame">
+                      <QrCodeSvg value={shareUrl} className="solved-qr-svg" />
                     </div>
+                    <span className="solved-qr-caption">
+                      Challenge a friend — scan to try this board!
+                    </span>
                   </div>
                 )}
-                <BoardSvg
-                  board={displayedBoard}
-                  showLetters={false}
-                  highlightedVehicleId={highlightedId}
-                  interactive={!isGenerating && !isSolved}
-                  onVehicleSlide={handleVehicleSlide}
-                  className="single-board-svg"
-                />
-              </div>
 
-              {/* Fixed-height single-row action bar (Reset always shown, never wraps!) */}
-              <div className="single-action-bar">
-                <button
-                  type="button"
-                  className="btn btn-secondary action-icon-btn"
-                  onClick={handleResetBoard}
-                  disabled={isGenerating || playerMoves === 0}
-                  title="Reset board"
-                  aria-label="Reset board"
-                >
-                  ↺
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleHint}
-                  disabled={isGenerating || isSolved}
-                >
-                  💡 Hint
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => onOpenSolution(card)}
-                  disabled={isGenerating}
-                >
-                  ▶ Solution
-                </button>
-                {isGenerating ? (
+                <div className="solved-actions">
                   <button
                     type="button"
-                    className="btn btn-danger"
-                    onClick={onCancel}
+                    className="btn btn-secondary"
+                    onClick={handleResetBoard}
                   >
-                    Stop
+                    ↺ Replay
                   </button>
-                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowShare(true)}
+                  >
+                    Share
+                  </button>
                   <button
                     type="button"
                     className="btn btn-primary"
@@ -371,37 +349,99 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
                   >
                     New Card
                   </button>
-                )}
-              </div>
-
-              <div className="single-card-meta">
-                <code>{card.code}</code>
-                <div className="single-meta-actions">
-                  <button
-                    type="button"
-                    className="link-btn-muted"
-                    onClick={() => setShowShare(true)}
-                  >
-                    Share / QR
-                  </button>
-                  <span className="meta-dot">·</span>
-                  <button
-                    type="button"
-                    className="link-btn-muted"
-                    onClick={() => setShowLookup((s) => !s)}
-                  >
-                    {showLookup ? 'Close' : 'Load Code'}
-                  </button>
                 </div>
               </div>
-            </>
+            </div>
+          )}
+
+          {card && displayedBoard ? (
+            <BoardSvg
+              board={displayedBoard}
+              showLetters={false}
+              highlightedVehicleId={highlightedId}
+              interactive={!isGenerating && !isSolved}
+              onVehicleSlide={handleVehicleSlide}
+              className="single-board-svg"
+            />
           ) : (
             <div className="single-placeholder">
               <p>
                 {isGenerating
-                  ? 'Generating your Rush Hour card…'
+                  ? 'Generating your Car Jam board…'
                   : 'Tap New Card to generate a puzzle.'}
               </p>
+            </div>
+          )}
+        </section>
+
+        {/* Actions + Code Bar (bottom on mobile, left sidebar on laptop/landscape iPad) */}
+        <section className="single-bottom-panel">
+          <div className="single-action-bar">
+            <button
+              type="button"
+              className="btn btn-secondary action-icon-btn"
+              onClick={handleResetBoard}
+              disabled={!card || isGenerating || playerMoves === 0}
+              title="Reset board"
+              aria-label="Reset board"
+            >
+              ↺
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleHint}
+              disabled={!card || isGenerating || isSolved}
+            >
+              💡 Hint
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => card && onOpenSolution(card)}
+              disabled={!card || isGenerating}
+            >
+              ▶ Solution
+            </button>
+            {isGenerating ? (
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={onCancel}
+              >
+                Stop
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={onGenerateOne}
+              >
+                New Card
+              </button>
+            )}
+          </div>
+
+          {card && (
+            <div className="single-card-meta">
+              <code>{card.code}</code>
+              <div className="single-meta-actions">
+                <button
+                  type="button"
+                  className="link-btn-muted"
+                  onClick={() => setShowShare(true)}
+                >
+                  Share / QR
+                </button>
+                <span className="meta-dot">·</span>
+                <button
+                  type="button"
+                  className="link-btn-muted"
+                  onClick={() => setShowLookup((s) => !s)}
+                >
+                  {showLookup ? 'Close' : 'Load Code'}
+                </button>
+              </div>
             </div>
           )}
 
@@ -426,7 +466,9 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
               >
                 📷 Scan QR
               </button>
-              {lookupError && <p className="error-text full-row">{lookupError}</p>}
+              {lookupError && (
+                <p className="error-text full-row">{lookupError}</p>
+              )}
             </form>
           )}
         </section>
