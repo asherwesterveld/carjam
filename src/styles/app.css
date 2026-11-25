@@ -1464,7 +1464,8 @@ body {
 }
 
 .rh-card-footer-center .rh-card-code {
-  flex: 0 1 auto;
+  width: 100%;
+  flex: 1 1 100%;
   text-align: center;
   white-space: normal;
   word-break: break-all;
@@ -1647,7 +1648,8 @@ body {
   flex: 1;
   padding: 10px 10px 8px;
   display: grid;
-  align-content: center;
+  align-content: start;
+  justify-content: center;
   justify-items: center;
   gap: 5px 8px;
   background: #f8fafc;
