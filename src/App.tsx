@@ -61,7 +61,6 @@ export const App: React.FC = () => {
   const [minMoves, setMinMoves] = useState(11);
   const [maxMoves, setMaxMoves] = useState(18);
   const [count, setCount] = useState(9);
-  const [pruneRedundant, setPruneRedundant] = useState(true);
   const [sortByMoves, setSortByMoves] = useState(true);
   const [showLetters, setShowLetters] = useState(false);
 
@@ -204,11 +203,11 @@ export const App: React.FC = () => {
       count: 1,
       minMoves: targetMin,
       maxMoves: targetMax,
-      pruneRedundant,
+      pruneRedundant: true,
       startCardNumber: 1,
       existingKeys: recentKeys,
     } satisfies WorkerRequest);
-  }, [exactMoves, maxMoves, minMoves, moveMode, pruneRedundant]);
+  }, [exactMoves, maxMoves, minMoves, moveMode]);
 
   // Auto-generate a new single card whenever the user changes move mode, exact moves, or range
   const lastAutoSpecRef = useRef<string>(
@@ -254,7 +253,7 @@ export const App: React.FC = () => {
         count,
         minMoves: targetMin,
         maxMoves: targetMax,
-        pruneRedundant,
+        pruneRedundant: true,
         startCardNumber: nextCardNum,
         existingKeys,
       } satisfies WorkerRequest);
@@ -266,7 +265,6 @@ export const App: React.FC = () => {
       maxMoves,
       minMoves,
       moveMode,
-      pruneRedundant,
     ]
   );
 
@@ -411,8 +409,6 @@ export const App: React.FC = () => {
             setMaxMoves={setMaxMoves}
             count={count}
             setCount={setCount}
-            pruneRedundant={pruneRedundant}
-            setPruneRedundant={setPruneRedundant}
             sortByMoves={sortByMoves}
             setSortByMoves={setSortByMoves}
             showLetters={showLetters}

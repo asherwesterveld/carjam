@@ -18,8 +18,6 @@ interface GeneratorControlsProps {
   setMaxMoves: (n: number) => void;
   count: number;
   setCount: (n: number) => void;
-  pruneRedundant: boolean;
-  setPruneRedundant: (b: boolean) => void;
   sortByMoves: boolean;
   setSortByMoves: (b: boolean) => void;
   showLetters: boolean;
@@ -51,8 +49,6 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
   setMaxMoves,
   count,
   setCount,
-  pruneRedundant,
-  setPruneRedundant,
   sortByMoves,
   setSortByMoves,
   showLetters,
@@ -255,15 +251,6 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
               onChange={(e) => setShowLetters(e.target.checked)}
             />
             <span>Show vehicle letters (A–K, O–R, X)</span>
-          </label>
-          <label className="toggle-item">
-            <input
-              type="checkbox"
-              checked={pruneRedundant}
-              onChange={(e) => setPruneRedundant(e.target.checked)}
-              disabled={isGenerating}
-            />
-            <span>Prune redundant pieces</span>
           </label>
           <label className="toggle-item">
             <input

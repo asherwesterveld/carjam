@@ -142,12 +142,12 @@ export const BoardSvg: React.FC<BoardSvgProps> = ({
       role="img"
       aria-label="Rush Hour 6 by 6 puzzle board"
     >
-      {/* Outer ThinkFun gray plastic frame */}
+      {/* Outer ThinkFun gray plastic frame (inset 1px so stroke never clips viewBox corners) */}
       <rect
-        x={0}
-        y={0}
-        width={boardPx + framePad * 2}
-        height={totalH}
+        x={1}
+        y={1}
+        width={totalW - 2}
+        height={totalH - 2}
         rx={12}
         fill="#475569"
         stroke="#1E293B"
