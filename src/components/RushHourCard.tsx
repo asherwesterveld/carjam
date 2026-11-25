@@ -72,8 +72,7 @@ export const BoardSvg: React.FC<BoardSvgProps> = ({
   const cellSize = 44;
   const boardPx = BOARD_SIZE * cellSize;
   const framePad = 14;
-  const exitWidth = 18;
-  const totalW = framePad * 2 + boardPx + exitWidth;
+  const totalW = framePad * 2 + boardPx;
   const totalH = framePad * 2 + boardPx;
 
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -169,18 +168,18 @@ export const BoardSvg: React.FC<BoardSvgProps> = ({
       <rect
         x={framePad + boardPx}
         y={framePad + EXIT_ROW * cellSize + 3}
-        width={framePad + 4}
+        width={framePad + 1}
         height={cellSize - 6}
         fill="#334155"
       />
 
-      {/* EXIT arrow badge */}
+      {/* EXIT arrow tucked inside the right curb notch so the board is perfectly centered */}
       <g
-        transform={`translate(${framePad + boardPx + framePad + 2}, ${
+        transform={`translate(${framePad + boardPx + 2.5}, ${
           framePad + EXIT_ROW * cellSize + cellSize / 2
         })`}
       >
-        <polygon points="0,-10 13,0 0,10" fill="#EF4444" />
+        <polygon points="0,-8 9.5,0 0,8" fill="#EF4444" />
       </g>
 
       {/* 6x6 parking lot tiles */}
