@@ -1,0 +1,151 @@
+/* Hidden on screen; exclusively used for exact-scale 56x87 mm printing */
+.print-root {
+  display: none;
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .app-shell {
+    display: block !important;
+  }
+
+  .print-root {
+    display: block !important;
+  }
+
+  /* Each printed page centers the 168mm x 261mm 3x3 card block */
+  .print-page {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .print-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .print-grid-3x3 {
+    display: grid;
+    grid-template-columns: repeat(3, 56mm);
+    grid-template-rows: repeat(3, 87mm);
+    gap: 0;
+  }
+
+  .print-slot {
+    width: 56mm;
+    height: 87mm;
+    position: relative;
+  }
+
+  .print-slot-empty {
+    width: 56mm;
+    height: 87mm;
+  }
+
+  /* Subtle cut-guide borders when crop marks are enabled */
+  .print-grid-3x3.with-crops .print-slot {
+    outline: 0.2mm dashed #94a3b8;
+    outline-offset: -0.1mm;
+  }
+
+  /* Exact physical 56x87 mm ThinkFun Rush Hour card dimensions */
+  .rh-card.rh-card-print {
+    width: 56mm !important;
+    height: 87mm !important;
+    max-width: none !important;
+    border-radius: 3mm !important;
+    border: 0.45mm solid #1e293b !important;
+    box-shadow: none !important;
+  }
+
+  .rh-card-print .rh-card-board-wrap {
+    padding: 2.5mm 2.2mm !important;
+  }
+
+  .rh-card-print .rh-card-unified-footer {
+    padding: 2.2mm 2.4mm !important;
+    gap: 2mm !important;
+  }
+
+  .rh-card-print .rh-card-tier-name {
+    font-size: 8.5pt !important;
+  }
+
+  .rh-card-print .rh-card-unified-stats {
+    font-size: 6.8pt !important;
+  }
+
+  .rh-card-print .rh-card-unified-code {
+    font-size: 5pt !important;
+  }
+
+  .rh-card-print .rh-card-header {
+    padding: 2mm 2.4mm 1.8mm !important;
+  }
+
+  .rh-card-print .rh-card-brand {
+    font-size: 8.5pt !important;
+  }
+
+  .rh-card-print .rh-card-num {
+    font-size: 9.5pt !important;
+  }
+
+  .rh-card-print .rh-card-sub-row {
+    font-size: 6.2pt !important;
+  }
+
+  .rh-card-print .rh-card-footer {
+    padding: 1.3mm 2.2mm !important;
+    font-size: 6pt !important;
+  }
+
+  .rh-card-print .rh-card-qr-box {
+    padding: 0.4mm !important;
+    border-radius: 0.8mm !important;
+  }
+
+  .rh-card-print .rh-card-qr {
+    width: 12mm !important;
+    height: 12mm !important;
+  }
+
+  .rh-card-print .rh-sol-grid {
+    padding: 2.2mm 2.2mm !important;
+  }
+
+  .rh-card-print .rh-sol-normal {
+    font-size: 8.5pt !important;
+    gap: 1.1mm 1.5mm !important;
+  }
+
+  .rh-card-print .rh-sol-compact {
+    font-size: 6.8pt !important;
+    gap: 0.75mm 0.9mm !important;
+  }
+
+  .rh-card-print .rh-sol-ultra {
+    font-size: 5.9pt !important;
+    gap: 0.55mm 0.7mm !important;
+  }
+}
