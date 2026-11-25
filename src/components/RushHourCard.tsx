@@ -279,7 +279,7 @@ export const RushHourCard: React.FC<RushHourCardProps> = ({
         />
       </div>
 
-      {/* Option B: Unified colored footer holding Level, Moves, Pieces, Code & QR */}
+      {/* Option B: Unified colored footer holding Level, Moves, Pieces & QR (ID stays on back) */}
       <div
         className="rh-card-unified-footer"
         style={{ backgroundColor: diff.color }}
@@ -289,7 +289,6 @@ export const RushHourCard: React.FC<RushHourCardProps> = ({
           <span className="rh-card-unified-stats">
             {card.moveCount} MOVES · {card.board.vehicles.length} pcs
           </span>
-          <span className="rh-card-unified-code">{card.code}</span>
         </div>
         {qrUrl && (
           <div className="rh-card-qr-box">
