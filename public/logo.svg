@@ -87,13 +87,13 @@
   </g>
 
   <!-- Subtle dark vignette to frame the foreground A -->
-  <rect x="8" y="8" width="276" height="276" rx="26" fill="#0F172A" fill-opacity="0.28" />
+  <rect x="8" y="8" width="276" height="276" rx="26" fill="#0F172A" fill-opacity="0.14" />
 
-  <!-- Superimposed exact orange 'A' monogram with dark contrast halo -->
+  <!-- Superimposed subtle semi-transparent orange 'A' monogram -->
   <g filter="url(#a-shadow)" stroke-linecap="round" stroke-linejoin="round" fill="none">
-    <path d="M 74 224 L 145 64 L 222 224" stroke="#181B1F" stroke-width="40" />
-    <path d="M 70 144 L 222 224" stroke="#181B1F" stroke-width="40" />
-    <path d="M 74 224 L 145 64 L 222 224" stroke="#F06400" stroke-width="24" />
-    <path d="M 70 144 L 222 224" stroke="#F06400" stroke-width="24" />
+    <path d="M 74 224 L 145 64 L 222 224" stroke="#181B1F" stroke-opacity="0.45" stroke-width="32" />
+    <path d="M 70 144 L 222 224" stroke="#181B1F" stroke-opacity="0.45" stroke-width="32" />
+    <path d="M 74 224 L 145 64 L 222 224" stroke="#F06400" stroke-opacity="0.74" stroke-width="22" />
+    <path d="M 70 144 L 222 224" stroke="#F06400" stroke-opacity="0.74" stroke-width="22" />
   </g>
 </svg>
