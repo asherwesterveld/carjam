@@ -89,7 +89,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
   return (
     <aside className="controls-panel no-print">
       <div className="controls-brand">
-        <div className="brand-badge">CJ</div>
+        <img src="./logo.png" alt="Car Jam logo" className="brand-logo" />
         <div>
           <h1>Car Jam</h1>
           <p>6×6 Traffic Card Studio</p>
