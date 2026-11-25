@@ -86,10 +86,14 @@
     </g>
   </g>
 
-  <!-- Superimposed translucent orange 'A' as separate overlapping strokes (richer where strokes intersect) -->
-  <g stroke="#F06400" stroke-opacity="0.42" stroke-width="24" stroke-linecap="round" fill="none">
-    <line x1="74" y1="224" x2="145" y2="64" />
-    <line x1="145" y1="64" x2="222" y2="224" />
-    <line x1="70" y1="144" x2="222" y2="224" />
+  <!-- Subtle dark vignette to frame the foreground A -->
+  <rect x="8" y="8" width="276" height="276" rx="26" fill="#0F172A" fill-opacity="0.28" />
+
+  <!-- Superimposed exact orange 'A' monogram with dark contrast halo -->
+  <g filter="url(#a-shadow)" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M 74 224 L 145 64 L 222 224" stroke="#181B1F" stroke-width="40" />
+    <path d="M 70 144 L 222 224" stroke="#181B1F" stroke-width="40" />
+    <path d="M 74 224 L 145 64 L 222 224" stroke="#F06400" stroke-width="24" />
+    <path d="M 70 144 L 222 224" stroke="#F06400" stroke-width="24" />
   </g>
 </svg>
