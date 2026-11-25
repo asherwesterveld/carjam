@@ -136,20 +136,17 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
     onOpenSolution(card);
   };
 
-  const getSneakyRemark = (): string => {
+  const getSneakyRemark = (): string | null => {
     if (viewedSolution && hintsUsed > 0) {
-      return `(only peeked at the solution 👀 and ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'})`;
+      return `don't worry, I cheated and looked at the solution first (and used ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'}) 👀`;
     }
     if (viewedSolution) {
-      return `(definitely didn't peek at the solution 👀)`;
+      return `don't worry, I cheated and looked at the solution first 👀`;
     }
-    if (hintsUsed === 1) {
-      return `(with just 1 tiny hint 😉)`;
+    if (hintsUsed > 0) {
+      return `and don't tell anybody I used ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'} 🤫`;
     }
-    if (hintsUsed > 1) {
-      return `(with a little help from ${hintsUsed} hints 😉)`;
-    }
-    return `(zero hints! 🧠)`;
+    return null;
   };
 
   const copyFallback = async (text: string) => {
@@ -180,7 +177,9 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
   const handleSolvedShare = async () => {
     if (!card || !diff) return;
     const remark = getSneakyRemark();
-    const shareText = `I solved this ${diff.label} Car Jam puzzle in ${playerMoves} moves (optimal: ${card.moveCount}) ${remark} — try to beat it:`;
+    const shareText = remark
+      ? `I solved this ${diff.label} Car Jam puzzle in ${playerMoves} moves (optimal: ${card.moveCount}) — ${remark}. Try to beat it:`
+      : `I solved this ${diff.label} Car Jam puzzle in ${playerMoves} moves (optimal: ${card.moveCount})! Try to beat it:`;
 
     if (typeof navigator.share === 'function') {
       try {
