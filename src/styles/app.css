@@ -558,18 +558,18 @@ body {
 /* Laptop / Landscape iPad: Side-by-side layout so board fills full vertical height */
 @media (min-width: 820px) {
   .single-mode {
-    padding: 16px 24px 20px;
+    padding: 16px 28px 20px;
   }
 
   .single-container {
-    max-width: 1120px;
-    grid-template-columns: 350px 1fr;
+    max-width: 1400px;
+    grid-template-columns: 340px 1fr;
     grid-template-rows: auto auto 1fr;
     grid-template-areas:
       'banner board'
       'controls board'
       'actions board';
-    column-gap: 20px;
+    column-gap: 28px;
     row-gap: 12px;
     align-items: start;
   }
@@ -609,10 +609,19 @@ body {
 
   .single-board-area {
     height: 100%;
-    border: 2px solid var(--card-frame);
-    border-radius: 18px;
-    padding: 18px;
-    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.2);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .single-board-svg {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 1 / 1;
   }
 }
 
