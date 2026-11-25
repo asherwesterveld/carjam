@@ -2,7 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta id="vp" name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Normalize phone layouts across browsers: Chrome and Firefox (and their zoom /
+      // font-scale settings) report different CSS viewport widths, which made Chrome
+      // render everything noticeably smaller. Lock portrait phones to a 390px layout
+      // that the browser scales to fill the screen, so every browser looks identical.
+      (function () {
+        var vp = document.getElementById('vp');
+        var portrait = window.matchMedia('(orientation: portrait)');
+        function update() {
+          var shortSide = Math.min(screen.width, screen.height);
+          var isPhone = shortSide > 0 && shortSide <= 600;
+          vp.setAttribute(
+            'content',
+            isPhone && portrait.matches && shortSide !== 390
+              ? 'width=390'
+              : 'width=device-width, initial-scale=1.0'
+          );
+        }
+        update();
+        if (portrait.addEventListener) portrait.addEventListener('change', update);
+      })();
+    </script>
     <title>Car Jam — Play Rush Hour Game Online &amp; Free Rush Hour Card Generator</title>
     <meta
       name="description"
