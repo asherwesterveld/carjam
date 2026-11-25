@@ -65,6 +65,7 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
   const [showScanner, setShowScanner] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [solvedCopied, setSolvedCopied] = useState(false);
+  const [solvedDismissed, setSolvedDismissed] = useState(false);
 
   if (card && card.id !== lastCardId) {
     setLastCardId(card.id);
@@ -74,6 +75,7 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
     setViewedSolution(false);
     setHighlightedId(undefined);
     setSolvedCopied(false);
+    setSolvedDismissed(false);
   }
 
   const displayedBoard = playBoard ?? card?.board ?? null;
@@ -101,6 +103,7 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
     setHintsUsed(0);
     setViewedSolution(false);
     setHighlightedId(undefined);
+    setSolvedDismissed(false);
   };
 
   const handleVehicleSlide = (vehicleId: VehicleId, newPos: number) => {
@@ -389,68 +392,6 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
             </div>
           )}
 
-          {card && isSolved && !isGenerating && (
-            <div className="single-solved-overlay">
-              <div className="solved-card">
-                <div className="solved-header">
-                  <span className="solved-emoji">🎉</span>
-                  <div>
-                    <h3>
-                      Solved in {playerMoves} move
-                      {playerMoves === 1 ? '' : 's'}!
-                    </h3>
-                    <p className="solved-sub">
-                      Optimal: {card.moveCount} moves
-                      {isOptimalSolve && !viewedSolution && hintsUsed === 0 && (
-                        <span className="solved-optimal-pill">★ Optimal!</span>
-                      )}
-                    </p>
-                    {(hintsUsed > 0 || viewedSolution) && (
-                      <div className="solved-sneaky-pill">
-                        {getSolvedScreenNote()}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {shareUrl && (
-                  <div className="solved-qr-section">
-                    <div className="solved-qr-frame">
-                      <QrCodeSvg value={shareUrl} className="solved-qr-svg" />
-                    </div>
-                    <span className="solved-qr-caption">
-                      Challenge a friend — scan to try this board!
-                    </span>
-                  </div>
-                )}
-
-                <div className="solved-actions">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={handleResetBoard}
-                  >
-                    ↺ Replay
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={handleSolvedShare}
-                  >
-                    {solvedCopied ? '✓ Copied' : 'Share'}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={onGenerateOne}
-                  >
-                    New Game
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
           {card && displayedBoard ? (
             <BoardSvg
               board={displayedBoard}
@@ -570,6 +511,74 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
           )}
         </section>
       </div>
+
+      {card && isSolved && !isGenerating && !solvedDismissed && (
+        <div
+          className="modal-backdrop no-print"
+          onClick={() => setSolvedDismissed(true)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Puzzle solved"
+        >
+          <div className="solved-card" onClick={(e) => e.stopPropagation()}>
+            <div className="solved-header">
+              <span className="solved-emoji">🎉</span>
+              <div>
+                <h3>
+                  Solved in {playerMoves} move
+                  {playerMoves === 1 ? '' : 's'}!
+                </h3>
+                <p className="solved-sub">
+                  Optimal: {card.moveCount} moves
+                  {isOptimalSolve && !viewedSolution && hintsUsed === 0 && (
+                    <span className="solved-optimal-pill">★ Optimal!</span>
+                  )}
+                </p>
+                {(hintsUsed > 0 || viewedSolution) && (
+                  <div className="solved-sneaky-pill">
+                    {getSolvedScreenNote()}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {shareUrl && (
+              <div className="solved-qr-section">
+                <div className="solved-qr-frame">
+                  <QrCodeSvg value={shareUrl} className="solved-qr-svg" />
+                </div>
+                <span className="solved-qr-caption">
+                  Challenge a friend — scan to try this board!
+                </span>
+              </div>
+            )}
+
+            <div className="solved-actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleResetBoard}
+              >
+                ↺ Replay
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleSolvedShare}
+              >
+                {solvedCopied ? '✓ Copied' : 'Share'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={onGenerateOne}
+              >
+                New Game
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showScanner && (
         <QrScannerModal
