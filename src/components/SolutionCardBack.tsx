@@ -13,7 +13,7 @@ export const MoveLabel: React.FC<{ move: Move }> = ({ move }) => (
   <>
     <span>{move.vehicleId}</span>
     <span className="move-arrow">{move.isExit ? '→' : DIR_ARROW[move.direction]}</span>
-    <span>{move.isExit ? 'OUT' : move.steps}</span>
+    <span>{move.isExit ? '💨' : move.steps}</span>
   </>
 );
 

@@ -265,7 +265,7 @@ const DIRECTION_ARROW = {
 
 export function formatMove(move: Move): string {
   if (move.isExit) {
-    return `${move.vehicleId}→OUT`;
+    return `${move.vehicleId}→💨`;
   }
   return `${move.vehicleId}${DIRECTION_ARROW[move.direction]}${move.steps}`;
 }

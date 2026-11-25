@@ -48,7 +48,7 @@ describe('Rush Hour Engine', () => {
     expect(sol.moves).toHaveLength(8);
     expect(sol.moves[sol.moves.length - 1].vehicleId).toBe('X');
     expect(sol.moves[sol.moves.length - 1].isExit).toBe(true);
-    expect(formatMove(sol.moves[sol.moves.length - 1])).toBe('X→OUT');
+    expect(formatMove(sol.moves[sol.moves.length - 1])).toBe('X→💨');
 
     // Replay every move and verify board stays valid and ends with X at col 4
     let current = CLASSIC_CARD_1;

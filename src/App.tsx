@@ -44,13 +44,21 @@ function loadInitialCardFromUrl(): PuzzleCard | null {
   };
 }
 
-export const App: React.FC = () => {
-  const [appMode, setAppMode] = useState<AppMode>('single');
+function getInitialModeFromPath(): AppMode {
+  if (new URLSearchParams(window.location.search).get('code')) {
+    return 'single';
+  }
+  const path = window.location.pathname.replace(/\/+$/, '');
+  return path.endsWith('/print') ? 'bulk' : 'single';
+}
 
-  // Shared generator settings
+export const App: React.FC = () => {
+  const [appMode, setAppMode] = useState<AppMode>(getInitialModeFromPath);
+
+  // Shared generator settings (default: Intermediate 11–18 moves)
   const [moveMode, setMoveMode] = useState<MoveMode>('range');
   const [exactMoves, setExactMoves] = useState(14);
-  const [minMoves, setMinMoves] = useState(8);
+  const [minMoves, setMinMoves] = useState(11);
   const [maxMoves, setMaxMoves] = useState(18);
   const [count, setCount] = useState(9);
   const [pruneRedundant, setPruneRedundant] = useState(true);
@@ -91,6 +99,22 @@ export const App: React.FC = () => {
     }
   };
 
+  const switchAppMode = useCallback((nextMode: AppMode) => {
+    setAppMode(nextMode);
+    const targetPath = nextMode === 'bulk' ? '/print' : '/';
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, '', targetPath);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onPopState = () => {
+      setAppMode(getInitialModeFromPath());
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
   // Worker state
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
@@ -130,13 +154,13 @@ export const App: React.FC = () => {
 
     workerRef.current = worker;
 
-    // If opened via a scanned QR code (?code=RH-...), load that exact card immediately
+    // If opened via a scanned QR code (?code=...), load that exact card immediately
     const urlCard = loadInitialCardFromUrl();
     if (urlCard) {
       setSingleCard(urlCard);
       setAppMode('single');
     } else {
-      // Auto-generate 1 starter card for Single Card mode on mount (StrictMode-safe)
+      // Auto-generate 1 starter Intermediate card on mount (StrictMode-safe)
       const reqId = ++requestIdRef.current;
       requestTargetRef.current = 'single';
       setIsGenerating(true);
@@ -145,7 +169,7 @@ export const App: React.FC = () => {
         type: 'generate',
         requestId: reqId,
         count: 1,
-        minMoves: 8,
+        minMoves: 11,
         maxMoves: 18,
         pruneRedundant: true,
         startCardNumber: 1,
@@ -318,7 +342,7 @@ export const App: React.FC = () => {
       {/* Top Mode Switcher Bar */}
       <header className="top-nav no-print">
         <div className="top-nav-brand">
-          <img src="./logo.svg" alt="Car Jam logo" className="brand-logo sm" />
+          <img src="/logo.svg" alt="Car Jam logo" className="brand-logo sm" />
           <span className="top-nav-title">Car Jam</span>
         </div>
 
@@ -327,14 +351,14 @@ export const App: React.FC = () => {
             <button
               type="button"
               className={appMode === 'single' ? 'active' : ''}
-              onClick={() => setAppMode('single')}
+              onClick={() => switchAppMode('single')}
             >
-              Single Card
+              Single Card &amp; Play
             </button>
             <button
               type="button"
               className={appMode === 'bulk' ? 'active' : ''}
-              onClick={() => setAppMode('bulk')}
+              onClick={() => switchAppMode('bulk')}
             >
               Bulk &amp; Print
             </button>
