@@ -23,6 +23,144 @@ type AppMode = 'single' | 'bulk';
 
 // Hardcoded production base URL encoded into QR codes and share links.
 const QR_BASE_URL = 'https://carjam.asherwesterveld.com';
+const PRINT_PREFS_STORAGE_KEY = 'carjam_print_prefs_v1';
+
+interface StoredPrintPrefs {
+  printMode?: PrintMode;
+  duplexFlip?: DuplexFlip;
+  duplexOffsetYmm?: number;
+  paperSize?: PaperSize;
+  count?: number;
+  showLetters?: boolean;
+  showQrCodes?: boolean;
+}
+
+function clampInt(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, Math.round(value)));
+}
+
+function loadStoredPrintPrefs(): StoredPrintPrefs {
+  try {
+    const raw = window.localStorage.getItem(PRINT_PREFS_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as StoredPrintPrefs;
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function buildPrintUrl(opts: {
+  moveMode: MoveMode;
+  exactMoves: number;
+  minMoves: number;
+  maxMoves: number;
+  count: number;
+  showLetters: boolean;
+  showQrCodes: boolean;
+}): string {
+  const params = new URLSearchParams();
+  if (opts.moveMode === 'exact') {
+    params.set('exact', String(opts.exactMoves));
+  } else {
+    params.set('min', String(opts.minMoves));
+    params.set('max', String(opts.maxMoves));
+  }
+  params.set('count', String(opts.count));
+  if (opts.showLetters) params.set('letters', '1');
+  if (!opts.showQrCodes) params.set('qr', '0');
+  return `/print?${params.toString()}`;
+}
+
+function readInitialPrintParams() {
+  const path = window.location.pathname.replace(/\/+$/, '');
+  const isPrintPath = path.endsWith('/print');
+  const params = new URLSearchParams(window.location.search);
+  const stored = loadStoredPrintPrefs();
+
+  const exactParam = isPrintPath ? params.get('exact') : null;
+  const minParam = isPrintPath ? params.get('min') : null;
+  const maxParam = isPrintPath ? params.get('max') : null;
+  const countParam = isPrintPath ? params.get('count') : null;
+  const lettersParam = isPrintPath ? params.get('letters') : null;
+  const qrParam = isPrintPath ? params.get('qr') : null;
+
+  let moveMode: MoveMode = 'range';
+  let exactMoves = 14;
+  let minMoves = 11;
+  let maxMoves = 18;
+
+  if (exactParam !== null && !Number.isNaN(Number(exactParam))) {
+    moveMode = 'exact';
+    exactMoves = clampInt(Number(exactParam), 1, 51);
+  } else if (minParam !== null || maxParam !== null) {
+    moveMode = 'range';
+    const parsedMin =
+      minParam !== null && !Number.isNaN(Number(minParam))
+        ? clampInt(Number(minParam), 1, 51)
+        : 11;
+    const parsedMax =
+      maxParam !== null && !Number.isNaN(Number(maxParam))
+        ? clampInt(Number(maxParam), 1, 51)
+        : 18;
+    minMoves = Math.min(parsedMin, parsedMax);
+    maxMoves = Math.max(parsedMin, parsedMax);
+  }
+
+  const count =
+    countParam !== null && !Number.isNaN(Number(countParam))
+      ? clampInt(Number(countParam), 1, 90)
+      : typeof stored.count === 'number'
+        ? clampInt(stored.count, 1, 90)
+        : 9;
+
+  const showLetters =
+    lettersParam !== null
+      ? lettersParam === '1' || lettersParam === 'true'
+      : Boolean(stored.showLetters);
+
+  const showQrCodes =
+    qrParam !== null
+      ? qrParam !== '0' && qrParam !== 'false'
+      : stored.showQrCodes ?? true;
+
+  const printMode: PrintMode =
+    stored.printMode === 'fronts' ||
+    stored.printMode === 'duplex' ||
+    stored.printMode === 'answer-key'
+      ? stored.printMode
+      : 'duplex';
+
+  const duplexFlip: DuplexFlip =
+    stored.duplexFlip === 'short-edge' || stored.duplexFlip === 'long-edge'
+      ? stored.duplexFlip
+      : 'long-edge';
+
+  const duplexOffsetYmm =
+    typeof stored.duplexOffsetYmm === 'number' &&
+    !Number.isNaN(stored.duplexOffsetYmm)
+      ? Math.max(-10, Math.min(10, stored.duplexOffsetYmm))
+      : 0;
+
+  const paperSize: PaperSize =
+    stored.paperSize === 'a4' || stored.paperSize === 'letter'
+      ? stored.paperSize
+      : 'letter';
+
+  return {
+    moveMode,
+    exactMoves,
+    minMoves,
+    maxMoves,
+    count,
+    showLetters,
+    showQrCodes,
+    printMode,
+    duplexFlip,
+    duplexOffsetYmm,
+    paperSize,
+  };
+}
 
 function loadInitialCardFromUrl(): PuzzleCard | null {
   const codeParam = new URLSearchParams(window.location.search).get('code');
@@ -53,23 +191,28 @@ function getInitialModeFromPath(): AppMode {
 
 export const App: React.FC = () => {
   const [initialUrlCard] = useState<PuzzleCard | null>(loadInitialCardFromUrl);
+  const [initialPrint] = useState(readInitialPrintParams);
   const [appMode, setAppMode] = useState<AppMode>(getInitialModeFromPath);
 
-  // Shared generator settings (default: Intermediate 11–18 moves, or matched to URL card)
-  const [moveMode, setMoveMode] = useState<MoveMode>('range');
-  const [exactMoves, setExactMoves] = useState(() => initialUrlCard?.moveCount ?? 14);
+  // Shared generator settings (matched to URL card, /print params, or default Intermediate 11–18)
+  const [moveMode, setMoveMode] = useState<MoveMode>(() =>
+    initialUrlCard ? 'range' : initialPrint.moveMode
+  );
+  const [exactMoves, setExactMoves] = useState(
+    () => initialUrlCard?.moveCount ?? initialPrint.exactMoves
+  );
   const [minMoves, setMinMoves] = useState(() => {
-    if (!initialUrlCard) return 11;
+    if (!initialUrlCard) return initialPrint.minMoves;
     const meta = DIFFICULTY_META[initialUrlCard.difficulty];
     return Math.min(meta.minMoves, initialUrlCard.moveCount);
   });
   const [maxMoves, setMaxMoves] = useState(() => {
-    if (!initialUrlCard) return 18;
+    if (!initialUrlCard) return initialPrint.maxMoves;
     const meta = DIFFICULTY_META[initialUrlCard.difficulty];
     return Math.max(meta.maxMoves, initialUrlCard.moveCount);
   });
-  const [count, setCount] = useState(9);
-  const [showLetters, setShowLetters] = useState(false);
+  const [count, setCount] = useState(() => initialPrint.count);
+  const [showLetters, setShowLetters] = useState(() => initialPrint.showLetters);
 
   // Single-card companion state
   const [singleCard, setSingleCard] = useState<PuzzleCard | null>(initialUrlCard);
@@ -84,28 +227,105 @@ export const App: React.FC = () => {
   const [showAbout, setShowAbout] = useState(false);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
 
-  // Print studio settings
-  const [printMode, setPrintMode] = useState<PrintMode>('duplex');
-  const [duplexFlip, setDuplexFlip] = useState<DuplexFlip>('long-edge');
-  const [duplexOffsetYmm, setDuplexOffsetYmm] = useState(0);
-  const [paperSize, setPaperSize] = useState<PaperSize>('letter');
-  const [showQrCodes, setShowQrCodes] = useState(true);
+  // Print studio settings (printer calibration persisted in localStorage)
+  const [printMode, setPrintMode] = useState<PrintMode>(() => initialPrint.printMode);
+  const [duplexFlip, setDuplexFlip] = useState<DuplexFlip>(() => initialPrint.duplexFlip);
+  const [duplexOffsetYmm, setDuplexOffsetYmm] = useState(() => initialPrint.duplexOffsetYmm);
+  const [paperSize, setPaperSize] = useState<PaperSize>(() => initialPrint.paperSize);
+  const [showQrCodes, setShowQrCodes] = useState(() => initialPrint.showQrCodes);
 
-  const switchAppMode = useCallback((nextMode: AppMode) => {
-    setAppMode(nextMode);
-    const targetPath = nextMode === 'bulk' ? '/print' : '/';
-    if (window.location.pathname !== targetPath) {
-      window.history.pushState(null, '', targetPath);
-    }
-  }, []);
-
+  // Persist printer & print-card preferences to localStorage
   useEffect(() => {
-    const onPopState = () => {
-      setAppMode(getInitialModeFromPath());
-    };
-    window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
-  }, []);
+    try {
+      const prefs: StoredPrintPrefs = {
+        printMode,
+        duplexFlip,
+        duplexOffsetYmm,
+        paperSize,
+        count,
+        showLetters,
+        showQrCodes,
+      };
+      window.localStorage.setItem(PRINT_PREFS_STORAGE_KEY, JSON.stringify(prefs));
+    } catch {
+      // Ignore storage errors (e.g. private browsing)
+    }
+  }, [
+    printMode,
+    duplexFlip,
+    duplexOffsetYmm,
+    paperSize,
+    count,
+    showLetters,
+    showQrCodes,
+  ]);
+
+  const switchAppMode = useCallback(
+    (nextMode: AppMode) => {
+      setAppMode(nextMode);
+      const targetUrl =
+        nextMode === 'bulk'
+          ? buildPrintUrl({
+              moveMode,
+              exactMoves,
+              minMoves,
+              maxMoves,
+              count,
+              showLetters,
+              showQrCodes,
+            })
+          : singleCard
+            ? `/?code=${encodeURIComponent(singleCard.code)}`
+            : '/';
+      if (window.location.pathname + window.location.search !== targetUrl) {
+        window.history.pushState(null, '', targetUrl);
+      }
+    },
+    [
+      count,
+      exactMoves,
+      maxMoves,
+      minMoves,
+      moveMode,
+      showLetters,
+      showQrCodes,
+      singleCard,
+    ]
+  );
+
+  // Keep the browser URL synced with the active puzzle code (/) or print deck settings (/print)
+  useEffect(() => {
+    if (appMode === 'single') {
+      if (!singleCard) return;
+      const targetUrl = `/?code=${encodeURIComponent(singleCard.code)}`;
+      if (window.location.pathname + window.location.search !== targetUrl) {
+        window.history.replaceState(null, '', targetUrl);
+      }
+    } else {
+      const targetUrl = buildPrintUrl({
+        moveMode,
+        exactMoves,
+        minMoves,
+        maxMoves,
+        count,
+        showLetters,
+        showQrCodes,
+      });
+      if (window.location.pathname + window.location.search !== targetUrl) {
+        window.history.replaceState(null, '', targetUrl);
+      }
+    }
+  }, [
+    appMode,
+    singleCard,
+    moveMode,
+    exactMoves,
+    minMoves,
+    maxMoves,
+    count,
+    showLetters,
+    showQrCodes,
+  ]);
 
   // Worker state
   const [isGenerating, setIsGenerating] = useState(false);
@@ -123,6 +343,22 @@ export const App: React.FC = () => {
     setMinMoves(nextMin);
     setMaxMoves(nextMax);
   }, []);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const nextMode = getInitialModeFromPath();
+      setAppMode(nextMode);
+      if (nextMode === 'single') {
+        const cardFromUrl = loadInitialCardFromUrl();
+        if (cardFromUrl) {
+          setSingleCard(cardFromUrl);
+          syncControlsToCard(cardFromUrl);
+        }
+      }
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [syncControlsToCard]);
 
   const handleSingleSetMoveMode = useCallback((m: MoveMode) => {
     setMoveMode(m);
