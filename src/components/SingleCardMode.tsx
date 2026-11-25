@@ -123,28 +123,52 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
     setHighlightedId(nextMove.vehicleId);
   };
 
+  const copyFallback = async (text: string) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        setSolvedCopied(true);
+        window.setTimeout(() => setSolvedCopied(false), 1800);
+        return;
+      }
+    } catch {
+      // Fall through to execCommand fallback for iOS / HTTP contexts
+    }
+    const el = document.createElement('textarea');
+    el.value = text;
+    el.setAttribute('readonly', '');
+    el.style.position = 'fixed';
+    el.style.opacity = '0';
+    document.body.appendChild(el);
+    el.select();
+    el.setSelectionRange(0, text.length);
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    setSolvedCopied(true);
+    window.setTimeout(() => setSolvedCopied(false), 1800);
+  };
+
   const handleSolvedShare = async () => {
     if (!card || !diff) return;
+    const shareText = `I solved this ${diff.label} Car Jam puzzle in ${playerMoves} moves (optimal: ${card.moveCount})! Try to beat it:`;
+
     if (typeof navigator.share === 'function') {
       try {
         await navigator.share({
           title: `Car Jam (${card.moveCount} Moves)`,
-          text: `I solved this ${diff.label} Car Jam puzzle in ${playerMoves} moves (optimal: ${card.moveCount})! Try to beat it:`,
+          text: shareText,
           url: shareUrl,
         });
         return;
-      } catch {
-        // User cancelled native share sheet
-        return;
+      } catch (err) {
+        // Only stop silently if the user deliberately cancelled the share sheet
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
       }
     }
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setSolvedCopied(true);
-      window.setTimeout(() => setSolvedCopied(false), 1800);
-    } catch {
-      // Clipboard unavailable
-    }
+
+    await copyFallback(`${shareText} ${shareUrl}`);
   };
 
   const handleLookupSubmit = (e: React.FormEvent) => {
