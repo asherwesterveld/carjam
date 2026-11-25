@@ -167,19 +167,19 @@ export const BoardSvg: React.FC<BoardSvgProps> = ({
       {/* Exit opening notch in right curb on row 2 */}
       <rect
         x={framePad + boardPx}
-        y={framePad + EXIT_ROW * cellSize + 2}
+        y={framePad + EXIT_ROW * cellSize + 3}
         width={framePad + 1}
-        height={cellSize - 4}
+        height={cellSize - 6}
         fill="#334155"
       />
 
-      {/* Bigger, bold EXIT arrow tucked cleanly inside the right curb notch */}
+      {/* EXIT arrow tucked inside the right curb notch so the board is perfectly centered */}
       <g
-        transform={`translate(${framePad + boardPx + 0.5}, ${
+        transform={`translate(${framePad + boardPx + 2.5}, ${
           framePad + EXIT_ROW * cellSize + cellSize / 2
         })`}
       >
-        <polygon points="0,-13 13,0 0,13" fill="#EF4444" />
+        <polygon points="0,-8 9.5,0 0,8" fill="#EF4444" />
       </g>
 
       {/* 6x6 parking lot tiles */}

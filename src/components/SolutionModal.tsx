@@ -3,10 +3,10 @@ import {
   DIFFICULTY_META,
   VEHICLE_CATALOG,
   applyMove,
-  formatMove,
 } from '../engine/catalog';
 import type { Board, PuzzleCard } from '../engine/types';
 import { BoardSvg } from './RushHourCard';
+import { MoveLabel } from './SolutionCardBack';
 
 interface SolutionModalProps {
   card: PuzzleCard;
@@ -226,7 +226,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({
                       className="move-badge"
                       style={{ backgroundColor: v.body, color: v.textColor }}
                     >
-                      {formatMove(move)}
+                      <MoveLabel move={move} />
                     </span>
                     <span className="move-desc">{v.name}</span>
                   </button>

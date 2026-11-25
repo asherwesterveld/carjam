@@ -1,6 +1,21 @@
 import React from 'react';
-import { DIFFICULTY_META, VEHICLE_CATALOG, formatMove } from '../engine/catalog';
-import type { PuzzleCard } from '../engine/types';
+import { DIFFICULTY_META, VEHICLE_CATALOG } from '../engine/catalog';
+import type { Direction, Move, PuzzleCard } from '../engine/types';
+
+const DIR_ARROW: Record<Direction, string> = {
+  U: '↑',
+  D: '↓',
+  L: '←',
+  R: '→',
+};
+
+export const MoveLabel: React.FC<{ move: Move }> = ({ move }) => (
+  <>
+    <span>{move.vehicleId}</span>
+    <span className="move-arrow">{move.isExit ? '→' : DIR_ARROW[move.direction]}</span>
+    <span>{move.isExit ? 'OUT' : move.steps}</span>
+  </>
+);
 
 interface SolutionCardBackProps {
   card: PuzzleCard;
@@ -58,7 +73,7 @@ export const SolutionCardBack: React.FC<SolutionCardBackProps> = ({
                 className="rh-sol-pill"
                 style={{ backgroundColor: v.body, color: v.textColor }}
               >
-                {formatMove(move)}
+                <MoveLabel move={move} />
               </span>
             </div>
           );
