@@ -18,10 +18,10 @@ interface GeneratorControlsProps {
   setMaxMoves: (n: number) => void;
   count: number;
   setCount: (n: number) => void;
-  sortByMoves: boolean;
-  setSortByMoves: (b: boolean) => void;
   showLetters: boolean;
   setShowLetters: (b: boolean) => void;
+  showQrCodes: boolean;
+  setShowQrCodes: (b: boolean) => void;
   isGenerating: boolean;
   progress: { completed: number; total: number };
   onGenerate: () => void;
@@ -49,10 +49,10 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
   setMaxMoves,
   count,
   setCount,
-  sortByMoves,
-  setSortByMoves,
   showLetters,
   setShowLetters,
+  showQrCodes,
+  setShowQrCodes,
   isGenerating,
   progress,
   onGenerate,
@@ -255,10 +255,10 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
           <label className="toggle-item">
             <input
               type="checkbox"
-              checked={sortByMoves}
-              onChange={(e) => setSortByMoves(e.target.checked)}
+              checked={showQrCodes}
+              onChange={(e) => setShowQrCodes(e.target.checked)}
             />
-            <span>Sort deck easiest → hardest</span>
+            <span>Show QR codes on cards</span>
           </label>
         </div>
       </section>

@@ -61,7 +61,6 @@ export const App: React.FC = () => {
   const [minMoves, setMinMoves] = useState(11);
   const [maxMoves, setMaxMoves] = useState(18);
   const [count, setCount] = useState(9);
-  const [sortByMoves, setSortByMoves] = useState(true);
   const [showLetters, setShowLetters] = useState(false);
 
   // Single-card companion state
@@ -321,11 +320,8 @@ export const App: React.FC = () => {
   };
 
   const displayCards = useMemo(() => {
-    const list = sortByMoves
-      ? [...cards].sort((a, b) => a.moveCount - b.moveCount)
-      : cards;
-    return list;
-  }, [cards, sortByMoves]);
+    return [...cards].sort((a, b) => a.moveCount - b.moveCount);
+  }, [cards]);
 
   const handlePrint = () => {
     window.print();
@@ -409,10 +405,10 @@ export const App: React.FC = () => {
             setMaxMoves={setMaxMoves}
             count={count}
             setCount={setCount}
-            sortByMoves={sortByMoves}
-            setSortByMoves={setSortByMoves}
             showLetters={showLetters}
             setShowLetters={setShowLetters}
+            showQrCodes={showQrCodes}
+            setShowQrCodes={setShowQrCodes}
             isGenerating={isGenerating}
             progress={progress}
             onGenerate={() => startBulkGeneration(false)}
@@ -502,15 +498,6 @@ export const App: React.FC = () => {
                   <option value="letter">US Letter</option>
                   <option value="a4">A4</option>
                 </select>
-
-                <label className="crop-check">
-                  <input
-                    type="checkbox"
-                    checked={showQrCodes}
-                    onChange={(e) => setShowQrCodes(e.target.checked)}
-                  />
-                  <span>QR codes</span>
-                </label>
 
                 <button
                   type="button"
