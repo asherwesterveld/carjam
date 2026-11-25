@@ -12,7 +12,7 @@ import { RushHourCard } from './components/RushHourCard';
 import { SingleCardMode } from './components/SingleCardMode';
 import { SolutionCardBack } from './components/SolutionCardBack';
 import { SolutionModal } from './components/SolutionModal';
-import { getDifficultyTier } from './engine/catalog';
+import { DIFFICULTY_META, getDifficultyTier } from './engine/catalog';
 import { decodeBoard, encodeBoard } from './engine/codec';
 import { canonicalBoardKey } from './engine/generator';
 import { solveBoard } from './engine/solver';
@@ -119,6 +119,22 @@ export const App: React.FC = () => {
   const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
   const requestTargetRef = useRef<AppMode>('single');
+  const lastAutoSpecRef = useRef<string>(
+    `${moveMode}:${exactMoves}:${minMoves}:${maxMoves}`
+  );
+
+  const syncControlsToCard = useCallback((card: PuzzleCard) => {
+    const tierMeta = DIFFICULTY_META[card.difficulty];
+    const nextMin = Math.min(tierMeta.minMoves, card.moveCount);
+    const nextMax = Math.max(tierMeta.maxMoves, card.moveCount);
+    // Update lastAutoSpecRef first so syncing controls to a loaded/shared card
+    // does NOT trigger auto-generation and overwrite the shared board!
+    lastAutoSpecRef.current = `range:${card.moveCount}:${nextMin}:${nextMax}`;
+    setMoveMode('range');
+    setExactMoves(card.moveCount);
+    setMinMoves(nextMin);
+    setMaxMoves(nextMax);
+  }, []);
 
   useEffect(() => {
     const worker = new Worker(
@@ -156,6 +172,7 @@ export const App: React.FC = () => {
     const urlCard = loadInitialCardFromUrl();
     if (urlCard) {
       setSingleCard(urlCard);
+      syncControlsToCard(urlCard);
       setAppMode('single');
     } else {
       // Auto-generate 1 starter Intermediate card on mount (StrictMode-safe)
@@ -209,9 +226,6 @@ export const App: React.FC = () => {
   }, [exactMoves, maxMoves, minMoves, moveMode]);
 
   // Auto-generate a new single card whenever the user changes move mode, exact moves, or range
-  const lastAutoSpecRef = useRef<string>(
-    `${moveMode}:${exactMoves}:${minMoves}:${maxMoves}`
-  );
   useEffect(() => {
     const spec = `${moveMode}:${exactMoves}:${minMoves}:${maxMoves}`;
     if (spec === lastAutoSpecRef.current) return;
@@ -312,6 +326,7 @@ export const App: React.FC = () => {
     };
     if (appMode === 'single') {
       setSingleCard(card);
+      syncControlsToCard(card);
     } else {
       setCards((prev) => [card, ...prev]);
       setSelectedCard(card);
