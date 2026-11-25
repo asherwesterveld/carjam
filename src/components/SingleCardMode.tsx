@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { DIFFICULTY_META, HERO_ID, applyMove } from '../engine/catalog';
 import { solveBoard } from '../engine/solver';
 import type { Board, DifficultyTier, PuzzleCard, VehicleId } from '../engine/types';
 import type { MoveMode } from './GeneratorControls';
 import { QrCodeSvg } from './QrCodeSvg';
-import { QrScannerModal } from './QrScannerModal';
 import { BoardSvg } from './RushHourCard';
-import { ShareCardModal } from './ShareCardModal';
+
+const QrScannerModal = lazy(() =>
+  import('./QrScannerModal').then((m) => ({ default: m.QrScannerModal }))
+);
+const ShareCardModal = lazy(() =>
+  import('./ShareCardModal').then((m) => ({ default: m.ShareCardModal }))
+);
 
 interface SingleCardModeProps {
   card: PuzzleCard | null;
@@ -538,18 +543,22 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
       )}
 
       {showScanner && (
-        <QrScannerModal
-          onDecoded={(raw) => onLookupCode(raw)}
-          onClose={() => setShowScanner(false)}
-        />
+        <Suspense fallback={null}>
+          <QrScannerModal
+            onDecoded={(raw) => onLookupCode(raw)}
+            onClose={() => setShowScanner(false)}
+          />
+        </Suspense>
       )}
 
       {showShare && card && (
-        <ShareCardModal
-          card={card}
-          shareUrl={shareUrl}
-          onClose={() => setShowShare(false)}
-        />
+        <Suspense fallback={null}>
+          <ShareCardModal
+            card={card}
+            shareUrl={shareUrl}
+            onClose={() => setShowShare(false)}
+          />
+        </Suspense>
       )}
     </main>
   );

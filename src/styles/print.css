@@ -103,13 +103,6 @@
     font-size: 6.8pt !important;
   }
 
-  .rh-card-print .rh-card-unified-code {
-    font-size: 4.8pt !important;
-    line-height: 1.2 !important;
-    white-space: normal !important;
-    word-break: break-all !important;
-  }
-
   .rh-card-print .rh-card-back-header {
     padding: 2mm 2.4mm !important;
   }
@@ -121,22 +114,6 @@
   .rh-card-print .rh-card-back-header .rh-card-moves {
     font-size: 6.2pt !important;
     padding: 0.6mm 1.8mm !important;
-  }
-
-  .rh-card-print .rh-card-header {
-    padding: 2mm 2.4mm 1.8mm !important;
-  }
-
-  .rh-card-print .rh-card-brand {
-    font-size: 8.5pt !important;
-  }
-
-  .rh-card-print .rh-card-num {
-    font-size: 9.5pt !important;
-  }
-
-  .rh-card-print .rh-card-sub-row {
-    font-size: 6.2pt !important;
   }
 
   .rh-card-print .rh-card-footer {

@@ -27,7 +27,7 @@ interface SolutionCardBackProps {
  * Authentic 56x87 mm solution card back for duplex printing.
  * Uses color-coded ThinkFun vehicle badges so solutions are readable with or without letters.
  */
-export const SolutionCardBack: React.FC<SolutionCardBackProps> = ({
+export const SolutionCardBack: React.FC<SolutionCardBackProps> = React.memo(({
   card,
   onClick,
   printMode = false,
@@ -85,4 +85,4 @@ export const SolutionCardBack: React.FC<SolutionCardBackProps> = ({
       </div>
     </div>
   );
-};
+});

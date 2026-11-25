@@ -1,0 +1,23 @@
+{
+  "name": "Car Jam — 6×6 Traffic Puzzle & Card Generator",
+  "short_name": "Car Jam",
+  "description": "Play Rush Hour style 6×6 sliding traffic puzzles online or generate exact-scale 56×87 mm printable challenge cards with duplex solutions and QR codes.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/carjam-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

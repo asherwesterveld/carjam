@@ -243,7 +243,7 @@ interface RushHourCardProps {
 /**
  * Authentic ThinkFun-style Rush Hour Challenge Card (exact 56x87 mm ratio).
  */
-export const RushHourCard: React.FC<RushHourCardProps> = ({
+export const RushHourCard: React.FC<RushHourCardProps> = React.memo(({
   card,
   showLetters,
   qrUrl,
@@ -298,4 +298,4 @@ export const RushHourCard: React.FC<RushHourCardProps> = ({
       </div>
     </div>
   );
-};
+});

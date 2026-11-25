@@ -11,7 +11,6 @@ interface PrintSheetProps {
   printMode: PrintMode;
   duplexFlip: DuplexFlip;
   duplexOffsetYmm?: number;
-  duplexOffsetXmm?: number;
   paperSize: PaperSize;
 }
 
@@ -59,23 +58,22 @@ function buildDuplexBackSlots(
   return out;
 }
 
-export const PrintSheet: React.FC<PrintSheetProps> = ({
+export const PrintSheet: React.FC<PrintSheetProps> = React.memo(({
   cards,
   showLetters,
   qrBaseUrl,
   printMode,
   duplexFlip,
   duplexOffsetYmm = 0,
-  duplexOffsetXmm = 0,
   paperSize,
 }) => {
   if (cards.length === 0) return null;
 
   const frontPages = chunk(cards, CARDS_PER_SHEET);
   const backOffsetStyle: React.CSSProperties | undefined =
-    duplexOffsetXmm !== 0 || duplexOffsetYmm !== 0
+    duplexOffsetYmm !== 0
       ? {
-          transform: `translate(${duplexOffsetXmm}mm, ${duplexOffsetYmm}mm)`,
+          transform: `translateY(${duplexOffsetYmm}mm)`,
         }
       : undefined;
 
@@ -215,4 +213,4 @@ export const PrintSheet: React.FC<PrintSheetProps> = ({
       )}
     </div>
   );
-};
+});

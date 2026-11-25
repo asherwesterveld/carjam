@@ -10,7 +10,7 @@ interface QrCodeSvgProps {
 /**
  * Synchronous, offline vector SVG QR code (prints razor-sharp at any DPI).
  */
-export const QrCodeSvg: React.FC<QrCodeSvgProps> = ({
+export const QrCodeSvg: React.FC<QrCodeSvgProps> = React.memo(({
   value,
   size,
   className,
@@ -58,4 +58,4 @@ export const QrCodeSvg: React.FC<QrCodeSvgProps> = ({
       <path d={qr.path} fill="#0F172A" />
     </svg>
   );
-};
+});

@@ -85,13 +85,6 @@ body {
   gap: 8px;
 }
 
-.brand-badge.sm {
-  width: 28px;
-  height: 28px;
-  font-size: 11px;
-  border-radius: 7px;
-}
-
 .brand-logo {
   width: 40px;
   height: 40px;
@@ -445,17 +438,6 @@ body {
   -webkit-user-select: none;
 }
 
-.single-solved-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.68);
-  backdrop-filter: blur(4px);
-  display: grid;
-  place-items: center;
-  z-index: 6;
-  padding: 16px;
-}
-
 .solved-card {
   width: 100%;
   max-width: 340px;
@@ -727,10 +709,6 @@ body {
   color: #475569;
 }
 
-.full-row {
-  flex-basis: 100%;
-}
-
 /* === Compact Modals (QR Scanner & Share Card) === */
 .modal-dialog.modal-compact {
   max-width: 400px;
@@ -919,20 +897,6 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.brand-badge {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #e11d2e, #b91c1c);
-  color: #fff;
-  font-weight: 900;
-  font-size: 16px;
-  display: grid;
-  place-items: center;
-  letter-spacing: 0.04em;
-  box-shadow: 0 2px 6px rgba(225, 29, 46, 0.35);
-}
-
 .controls-brand h1 {
   margin: 0;
   font-size: 17px;
@@ -1082,7 +1046,6 @@ body {
 
 .input-row input[type='number'],
 .count-input,
-.inline-number input,
 .lookup-form input {
   width: 100%;
   max-width: 78px;
@@ -1143,15 +1106,6 @@ body {
   font-size: 12.5px;
   font-weight: 500;
   cursor: pointer;
-}
-
-.inline-number {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12.5px;
-  font-weight: 500;
-  margin-top: 2px;
 }
 
 /* Buttons */
@@ -1345,16 +1299,6 @@ body {
   text-align: center;
 }
 
-.crop-check {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-}
-
 .print-tip-bar {
   display: flex;
   flex-wrap: wrap;
@@ -1366,33 +1310,6 @@ body {
   background: var(--surface-muted);
   padding: 8px 14px;
   border-radius: 8px;
-}
-
-.print-tip-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.qr-url-field {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.qr-url-field input {
-  width: 210px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--text);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11.5px;
 }
 
 .link-btn {
@@ -1501,69 +1418,6 @@ body {
   line-height: 1.25;
 }
 
-.rh-card-header {
-  padding: 8px 10px 7px;
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.rh-card-header-qr {
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 8px;
-}
-
-.rh-card-header-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.rh-card-meta-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  font-size: 7.5px;
-  font-weight: 700;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  opacity: 0.9;
-  margin-top: 1px;
-}
-
-.rh-card-title-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-
-.rh-card-brand {
-  font-weight: 900;
-  font-size: 13px;
-  letter-spacing: 0.08em;
-}
-
-.rh-card-num {
-  font-weight: 900;
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-}
-
-.rh-card-sub-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  opacity: 0.95;
-}
-
 .rh-card-moves {
   background: rgba(15, 23, 42, 0.28);
   padding: 1px 6px;
@@ -1616,16 +1470,6 @@ body {
   opacity: 0.96;
 }
 
-.rh-card-unified-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 7.5px;
-  font-weight: 700;
-  opacity: 0.9;
-  line-height: 1.25;
-  white-space: normal;
-  word-break: break-all;
-}
-
 .rh-card-svg {
   width: 100%;
   height: auto;
@@ -1668,10 +1512,6 @@ body {
   white-space: nowrap;
   min-width: 0;
   flex: 1;
-}
-
-.rh-card-pieces {
-  flex-shrink: 0;
 }
 
 /* === Solution Card Back === */

@@ -9,7 +9,7 @@ const ID_TO_INDEX = new Map<VehicleId, number>(
 /**
  * Encodes a board into a compact, human-typable puzzle code with checksum.
  * Preserves exact vehicle IDs (colors), orientations, and coordinates.
- * Format: RH-XXXX-XXXX-...
+ * Format: XXXX-XXXX-... (decoder also accepts legacy RH-XXXX-... codes).
  */
 export function encodeBoard(board: Board): string {
   // Sort deterministically for canonical codes

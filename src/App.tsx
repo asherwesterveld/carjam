@@ -1,23 +1,50 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AboutModal } from './components/AboutModal';
-import {
-  GeneratorControls,
-  type DuplexFlip,
-  type MoveMode,
-  type PaperSize,
-  type PrintMode,
+import React, {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import type {
+  DuplexFlip,
+  MoveMode,
+  PaperSize,
+  PrintMode,
 } from './components/GeneratorControls';
-import { PrintSheet, buildCardQrUrl } from './components/PrintSheet';
 import { RushHourCard } from './components/RushHourCard';
 import { SingleCardMode } from './components/SingleCardMode';
 import { SolutionCardBack } from './components/SolutionCardBack';
-import { SolutionModal } from './components/SolutionModal';
 import { DIFFICULTY_META, getDifficultyTier } from './engine/catalog';
 import { decodeBoard, encodeBoard } from './engine/codec';
 import { canonicalBoardKey } from './engine/generator';
 import { solveBoard } from './engine/solver';
 import type { PuzzleCard } from './engine/types';
 import type { WorkerRequest, WorkerResponse } from './worker/generator.worker';
+
+const AboutModal = lazy(() =>
+  import('./components/AboutModal').then((m) => ({ default: m.AboutModal }))
+);
+const GeneratorControls = lazy(() =>
+  import('./components/GeneratorControls').then((m) => ({
+    default: m.GeneratorControls,
+  }))
+);
+const PrintSheet = lazy(() =>
+  import('./components/PrintSheet').then((m) => ({ default: m.PrintSheet }))
+);
+const SolutionModal = lazy(() =>
+  import('./components/SolutionModal').then((m) => ({
+    default: m.SolutionModal,
+  }))
+);
+
+function buildCardQrUrl(baseUrl: string | undefined, code: string): string | undefined {
+  const trimmed = baseUrl?.trim().replace(/\/+$/, '');
+  if (!trimmed) return undefined;
+  return `${trimmed}/?code=${encodeURIComponent(code)}`;
+}
 
 type AppMode = 'single' | 'bulk';
 
@@ -332,7 +359,20 @@ export const App: React.FC = () => {
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
   const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
-  const requestTargetRef = useRef<AppMode>('single');
+  const requestTargetRef = useRef<AppMode | 'prefetch'>('single');
+  const prefetchedSingleRef = useRef<{ spec: string; card: PuzzleCard } | null>(null);
+  const prefetchSpecRef = useRef<string>('');
+  const [prefetchVersion, setPrefetchVersion] = useState(0);
+
+  const currentSingleSpec = `${moveMode}:${exactMoves}:${minMoves}:${maxMoves}`;
+
+  // Update page title when switching between Play and Bulk & Print
+  useEffect(() => {
+    document.title =
+      appMode === 'bulk'
+        ? 'Car Jam — Bulk Rush Hour Card Generator & Print Studio'
+        : 'Car Jam — Play Rush Hour Game Online & Free Rush Hour Card Generator';
+  }, [appMode]);
 
   const syncControlsToCard = useCallback((card: PuzzleCard) => {
     const tierMeta = DIFFICULTY_META[card.difficulty];
@@ -391,6 +431,13 @@ export const App: React.FC = () => {
       if (msg.requestId !== requestIdRef.current) return;
 
       if (msg.type === 'progress') {
+        if (requestTargetRef.current === 'prefetch') {
+          prefetchedSingleRef.current = {
+            spec: prefetchSpecRef.current,
+            card: msg.card,
+          };
+          return;
+        }
         if (requestTargetRef.current === 'single') {
           singleSeenKeysRef.current.add(canonicalBoardKey(msg.card.board));
           setSingleCard(msg.card);
@@ -399,6 +446,9 @@ export const App: React.FC = () => {
         }
         setProgress({ completed: msg.completed, total: msg.total });
       } else if (msg.type === 'done') {
+        if (requestTargetRef.current === 'prefetch') {
+          return;
+        }
         setIsGenerating(false);
         if (msg.failedCount > 0 && !msg.cancelled) {
           setStatusNotice(
@@ -437,6 +487,17 @@ export const App: React.FC = () => {
   }, [initialUrlCard]);
 
   const generateSingleCard = useCallback(() => {
+    // Use prefetched card immediately if it matches the current difficulty/move target
+    const cached = prefetchedSingleRef.current;
+    if (cached && cached.spec === currentSingleSpec) {
+      prefetchedSingleRef.current = null;
+      singleSeenKeysRef.current.add(canonicalBoardKey(cached.card.board));
+      setStatusNotice(null);
+      setSingleCard(cached.card);
+      setPrefetchVersion((v) => v + 1);
+      return;
+    }
+
     if (!workerRef.current) return;
     const reqId = ++requestIdRef.current;
     requestTargetRef.current = 'single';
@@ -461,7 +522,54 @@ export const App: React.FC = () => {
       startCardNumber: 1,
       existingKeys: recentKeys,
     } satisfies WorkerRequest);
-  }, [exactMoves, maxMoves, minMoves, moveMode]);
+  }, [currentSingleSpec, exactMoves, maxMoves, minMoves, moveMode]);
+
+  // Silently prefetch 1 next card in the background so clicking "New Game" is instant (0ms)
+  useEffect(() => {
+    if (appMode !== 'single' || !singleCard || isGenerating || !workerRef.current) {
+      return;
+    }
+    if (prefetchedSingleRef.current?.spec === currentSingleSpec) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      if (!workerRef.current || prefetchedSingleRef.current?.spec === currentSingleSpec) {
+        return;
+      }
+      const reqId = ++requestIdRef.current;
+      requestTargetRef.current = 'prefetch';
+      prefetchSpecRef.current = currentSingleSpec;
+
+      const targetMin = moveMode === 'exact' ? exactMoves : minMoves;
+      const targetMax = moveMode === 'exact' ? exactMoves : maxMoves;
+      const recentKeys = Array.from(singleSeenKeysRef.current).slice(-40);
+      recentKeys.push(canonicalBoardKey(singleCard.board));
+
+      workerRef.current.postMessage({
+        type: 'generate',
+        requestId: reqId,
+        count: 1,
+        minMoves: targetMin,
+        maxMoves: targetMax,
+        pruneRedundant: true,
+        startCardNumber: 1,
+        existingKeys: recentKeys,
+      } satisfies WorkerRequest);
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    appMode,
+    singleCard,
+    isGenerating,
+    currentSingleSpec,
+    prefetchVersion,
+    moveMode,
+    exactMoves,
+    minMoves,
+    maxMoves,
+  ]);
 
   // Auto-generate a new single card ONLY when the user edits move controls
   useEffect(() => {
@@ -654,28 +762,30 @@ export const App: React.FC = () => {
         />
       ) : (
         <div className="app-shell">
-          <GeneratorControls
-            moveMode={moveMode}
-            setMoveMode={setMoveMode}
-            exactMoves={exactMoves}
-            setExactMoves={setExactMoves}
-            minMoves={minMoves}
-            setMinMoves={setMinMoves}
-            maxMoves={maxMoves}
-            setMaxMoves={setMaxMoves}
-            count={count}
-            setCount={setCount}
-            showLetters={showLetters}
-            setShowLetters={setShowLetters}
-            showQrCodes={showQrCodes}
-            setShowQrCodes={setShowQrCodes}
-            isGenerating={isGenerating}
-            progress={progress}
-            onGenerate={() => startBulkGeneration(false)}
-            onAppend={() => startBulkGeneration(true)}
-            onCancel={cancelGeneration}
-            onLookupCode={handleLookupCode}
-          />
+          <Suspense fallback={<aside className="controls-panel no-print" />}>
+            <GeneratorControls
+              moveMode={moveMode}
+              setMoveMode={setMoveMode}
+              exactMoves={exactMoves}
+              setExactMoves={setExactMoves}
+              minMoves={minMoves}
+              setMinMoves={setMinMoves}
+              maxMoves={maxMoves}
+              setMaxMoves={setMaxMoves}
+              count={count}
+              setCount={setCount}
+              showLetters={showLetters}
+              setShowLetters={setShowLetters}
+              showQrCodes={showQrCodes}
+              setShowQrCodes={setShowQrCodes}
+              isGenerating={isGenerating}
+              progress={progress}
+              onGenerate={() => startBulkGeneration(false)}
+              onAppend={() => startBulkGeneration(true)}
+              onCancel={cancelGeneration}
+              onLookupCode={handleLookupCode}
+            />
+          </Suspense>
 
           <main className="deck-stage no-print">
             <header className="stage-toolbar">
@@ -830,25 +940,43 @@ export const App: React.FC = () => {
       )}
 
       {selectedCard && (
-        <SolutionModal
-          card={selectedCard}
-          showLetters={appMode === 'single' ? false : showLetters}
-          onClose={() => setSelectedCard(null)}
-        />
+        <Suspense fallback={null}>
+          <SolutionModal
+            card={selectedCard}
+            showLetters={appMode === 'single' ? false : showLetters}
+            onClose={() => setSelectedCard(null)}
+          />
+        </Suspense>
       )}
 
-      {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
+      {showAbout && (
+        <Suspense fallback={null}>
+          <AboutModal onClose={() => setShowAbout(false)} />
+        </Suspense>
+      )}
 
-      {/* Hidden on screen; exact 56x87mm 3x3 sheets when printing */}
-      <PrintSheet
-        cards={appMode === 'bulk' ? displayCards : singleCard ? [singleCard] : []}
-        showLetters={showLetters}
-        qrBaseUrl={showQrCodes ? QR_BASE_URL : undefined}
-        printMode={printMode}
-        duplexFlip={duplexFlip}
-        duplexOffsetYmm={duplexOffsetYmm}
-        paperSize={paperSize}
-      />
+      {/* Hidden on screen; rendered only when idle in bulk mode or single-card printing */}
+      {!isGenerating &&
+        ((appMode === 'bulk' && displayCards.length > 0) ||
+          (appMode === 'single' && singleCard !== null)) && (
+          <Suspense fallback={null}>
+            <PrintSheet
+              cards={
+                appMode === 'bulk'
+                  ? displayCards
+                  : singleCard
+                    ? [singleCard]
+                    : []
+              }
+              showLetters={showLetters}
+              qrBaseUrl={showQrCodes ? QR_BASE_URL : undefined}
+              printMode={printMode}
+              duplexFlip={duplexFlip}
+              duplexOffsetYmm={duplexOffsetYmm}
+              paperSize={paperSize}
+            />
+          </Suspense>
+        )}
     </div>
   );
 };
