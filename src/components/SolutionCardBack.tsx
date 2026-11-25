@@ -43,15 +43,9 @@ export const SolutionCardBack: React.FC<SolutionCardBackProps> = ({
       }
       style={{ '--tier-color': diff.color } as React.CSSProperties}
     >
-      <div className="rh-card-header" style={{ backgroundColor: diff.color }}>
-        <div className="rh-card-title-row">
-          <span className="rh-card-brand">SOLUTION</span>
-          <span className="rh-card-moves">{card.moveCount} MOVES</span>
-        </div>
-        <div className="rh-card-sub-row">
-          <span className="rh-card-tier">{diff.label}</span>
-          <span>{card.board.vehicles.length} vehicles</span>
-        </div>
+      <div className="rh-card-back-header" style={{ backgroundColor: diff.color }}>
+        <span className="rh-card-tier">{diff.label}</span>
+        <span className="rh-card-moves">{card.moveCount} MOVES</span>
       </div>
 
       <div className={`rh-sol-grid ${densityClass}`}>
@@ -71,9 +65,8 @@ export const SolutionCardBack: React.FC<SolutionCardBackProps> = ({
         })}
       </div>
 
-      <div className="rh-card-footer">
+      <div className="rh-card-footer rh-card-footer-center">
         <span className="rh-card-code">{card.code}</span>
-        <span className="rh-card-pieces">Optimal</span>
       </div>
     </div>
   );

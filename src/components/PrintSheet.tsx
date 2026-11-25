@@ -10,6 +10,8 @@ interface PrintSheetProps {
   qrBaseUrl?: string;
   printMode: PrintMode;
   duplexFlip: DuplexFlip;
+  duplexOffsetYmm?: number;
+  duplexOffsetXmm?: number;
   paperSize: PaperSize;
   showCropMarks: boolean;
 }
@@ -64,12 +66,20 @@ export const PrintSheet: React.FC<PrintSheetProps> = ({
   qrBaseUrl,
   printMode,
   duplexFlip,
+  duplexOffsetYmm = 0,
+  duplexOffsetXmm = 0,
   paperSize,
   showCropMarks,
 }) => {
   if (cards.length === 0) return null;
 
   const frontPages = chunk(cards, CARDS_PER_SHEET);
+  const backOffsetStyle: React.CSSProperties | undefined =
+    duplexOffsetXmm !== 0 || duplexOffsetYmm !== 0
+      ? {
+          transform: `translate(${duplexOffsetXmm}mm, ${duplexOffsetYmm}mm)`,
+        }
+      : undefined;
 
   return (
     <div className={`print-root paper-${paperSize}`}>
@@ -143,6 +153,7 @@ export const PrintSheet: React.FC<PrintSheetProps> = ({
                   className={`print-grid-3x3 ${
                     showCropMarks ? 'with-crops' : ''
                   }`}
+                  style={backOffsetStyle}
                 >
                   {backSlots.map((card, slotIdx) => (
                     <div key={slotIdx} className="print-slot">

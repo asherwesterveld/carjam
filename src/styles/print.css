@@ -28,15 +28,27 @@
     display: block !important;
   }
 
-  /* Each printed page centers the 168mm x 261mm 3x3 card block */
+  /* Exact physical sheet dimensions (avoids 100vh vertical drift across duplex pages) */
   .print-page {
-    width: 100%;
-    height: 100vh;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
     page-break-after: always;
     break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .paper-letter .print-page {
+    width: 215.9mm;
+    height: 279.4mm;
+  }
+
+  .paper-a4 .print-page {
+    width: 210mm;
+    height: 297mm;
   }
 
   .print-page:last-child {
@@ -97,6 +109,19 @@
 
   .rh-card-print .rh-card-unified-code {
     font-size: 5pt !important;
+  }
+
+  .rh-card-print .rh-card-back-header {
+    padding: 2mm 2.4mm !important;
+  }
+
+  .rh-card-print .rh-card-back-header .rh-card-tier {
+    font-size: 7.2pt !important;
+  }
+
+  .rh-card-print .rh-card-back-header .rh-card-moves {
+    font-size: 6.2pt !important;
+    padding: 0.6mm 1.8mm !important;
   }
 
   .rh-card-print .rh-card-header {

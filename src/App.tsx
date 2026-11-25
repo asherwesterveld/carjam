@@ -71,6 +71,7 @@ export const App: React.FC = () => {
   // Print studio settings
   const [printMode, setPrintMode] = useState<PrintMode>('duplex');
   const [duplexFlip, setDuplexFlip] = useState<DuplexFlip>('long-edge');
+  const [duplexOffsetYmm, setDuplexOffsetYmm] = useState(0);
   const [paperSize, setPaperSize] = useState<PaperSize>('letter');
   const [showCropMarks, setShowCropMarks] = useState(true);
   const [showQrCodes, setShowQrCodes] = useState(true);
@@ -443,16 +444,35 @@ export const App: React.FC = () => {
                 </select>
 
                 {printMode === 'duplex' && (
-                  <select
-                    value={duplexFlip}
-                    onChange={(e) =>
-                      setDuplexFlip(e.target.value as DuplexFlip)
-                    }
-                    aria-label="Duplex flip edge"
-                  >
-                    <option value="long-edge">Flip Long Edge</option>
-                    <option value="short-edge">Flip Short Edge</option>
-                  </select>
+                  <>
+                    <select
+                      value={duplexFlip}
+                      onChange={(e) =>
+                        setDuplexFlip(e.target.value as DuplexFlip)
+                      }
+                      aria-label="Duplex flip edge"
+                    >
+                      <option value="long-edge">Flip Long Edge</option>
+                      <option value="short-edge">Flip Short Edge</option>
+                    </select>
+                    <label
+                      className="duplex-offset-field"
+                      title="Nudge back page up (-) or down (+) in mm to match your printer's duplex alignment"
+                    >
+                      <span>Back Y</span>
+                      <input
+                        type="number"
+                        step={0.5}
+                        min={-10}
+                        max={10}
+                        value={duplexOffsetYmm}
+                        onChange={(e) =>
+                          setDuplexOffsetYmm(Number(e.target.value) || 0)
+                        }
+                      />
+                      <span>mm</span>
+                    </label>
+                  </>
                 )}
 
                 <select
@@ -582,6 +602,7 @@ export const App: React.FC = () => {
         qrBaseUrl={showQrCodes ? qrBaseUrl : undefined}
         printMode={printMode}
         duplexFlip={duplexFlip}
+        duplexOffsetYmm={duplexOffsetYmm}
         paperSize={paperSize}
         showCropMarks={showCropMarks}
       />
