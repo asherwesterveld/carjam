@@ -281,15 +281,15 @@ export const VehicleSvg: React.FC<VehicleSvgProps> = ({
           pointerEvents="none"
         >
           <circle
-            r={Math.min(visualW, visualH) * 0.35}
-            fill="rgba(15, 23, 42, 0.74)"
+            r={Math.min(visualW, visualH) * 0.5}
+            fill="rgba(15, 23, 42, 0.78)"
           />
           <text
             textAnchor="middle"
             dominantBaseline="central"
             fill="#FFFFFF"
             fontWeight={900}
-            fontSize={Math.min(visualW, visualH) * 0.5}
+            fontSize={Math.min(visualW, visualH) * 0.68}
             fontFamily="system-ui, -apple-system, sans-serif"
           >
             {vehicle.id}

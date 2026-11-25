@@ -21,9 +21,8 @@ import type { WorkerRequest, WorkerResponse } from './worker/generator.worker';
 
 type AppMode = 'single' | 'bulk';
 
-// Default base URL encoded into printed card QR codes.
-const DEFAULT_QR_BASE_URL = 'https://carjam.asherwesterveld.com';
-const QR_URL_STORAGE_KEY = 'carjam_qr_base_url';
+// Hardcoded production base URL encoded into QR codes and share links.
+const QR_BASE_URL = 'https://carjam.asherwesterveld.com';
 
 function loadInitialCardFromUrl(): PuzzleCard | null {
   const codeParam = new URLSearchParams(window.location.search).get('code');
@@ -80,22 +79,6 @@ export const App: React.FC = () => {
   const [duplexOffsetYmm, setDuplexOffsetYmm] = useState(0);
   const [paperSize, setPaperSize] = useState<PaperSize>('letter');
   const [showQrCodes, setShowQrCodes] = useState(true);
-  const [qrBaseUrl, setQrBaseUrl] = useState<string>(() => {
-    try {
-      return window.localStorage.getItem(QR_URL_STORAGE_KEY) || DEFAULT_QR_BASE_URL;
-    } catch {
-      return DEFAULT_QR_BASE_URL;
-    }
-  });
-
-  const updateQrBaseUrl = (val: string) => {
-    setQrBaseUrl(val);
-    try {
-      window.localStorage.setItem(QR_URL_STORAGE_KEY, val);
-    } catch {
-      // ignore storage quota/privacy errors
-    }
-  };
 
   const switchAppMode = useCallback((nextMode: AppMode) => {
     setAppMode(nextMode);
@@ -389,7 +372,7 @@ export const App: React.FC = () => {
           card={singleCard}
           shareUrl={
             singleCard
-              ? buildCardQrUrl(qrBaseUrl, singleCard.code) ??
+              ? buildCardQrUrl(QR_BASE_URL, singleCard.code) ??
                 `${window.location.origin}/?code=${encodeURIComponent(singleCard.code)}`
               : ''
           }
@@ -531,29 +514,16 @@ export const App: React.FC = () => {
                 per sheet). Set Scale to <strong>100%</strong> &amp; enable{' '}
                 <strong>Background Graphics</strong>.
               </span>
-              <div className="print-tip-right">
-                {showQrCodes && (
-                  <label className="qr-url-field">
-                    <span>QR URL</span>
-                    <input
-                      type="url"
-                      value={qrBaseUrl}
-                      onChange={(e) => updateQrBaseUrl(e.target.value)}
-                      placeholder="https://your-domain.com"
-                    />
-                  </label>
-                )}
-                {displayCards.length > 0 && (
-                  <button
-                    type="button"
-                    className="link-btn"
-                    onClick={() => setCards([])}
-                    disabled={isGenerating}
-                  >
-                    Clear Deck
-                  </button>
-                )}
-              </div>
+              {displayCards.length > 0 && (
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={() => setCards([])}
+                  disabled={isGenerating}
+                >
+                  Clear Deck
+                </button>
+              )}
             </div>
 
             {statusNotice && (
@@ -578,7 +548,7 @@ export const App: React.FC = () => {
                         showLetters={showLetters}
                         qrUrl={
                           showQrCodes
-                            ? buildCardQrUrl(qrBaseUrl, card.code)
+                            ? buildCardQrUrl(QR_BASE_URL, card.code)
                             : undefined
                         }
                         onClick={() => setSelectedCard(card)}
@@ -611,7 +581,7 @@ export const App: React.FC = () => {
       <PrintSheet
         cards={appMode === 'bulk' ? displayCards : singleCard ? [singleCard] : []}
         showLetters={showLetters}
-        qrBaseUrl={showQrCodes ? qrBaseUrl : undefined}
+        qrBaseUrl={showQrCodes ? QR_BASE_URL : undefined}
         printMode={printMode}
         duplexFlip={duplexFlip}
         duplexOffsetYmm={duplexOffsetYmm}
