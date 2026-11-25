@@ -789,6 +789,44 @@ body {
   line-height: 1.4;
 }
 
+.scanner-divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.scanner-divider::before,
+.scanner-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.scanner-manual-form {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+}
+
+.scanner-manual-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 11px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-subtle);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+}
+
 .share-qr-wrap {
   background: #ffffff;
   padding: 12px;
@@ -851,27 +889,6 @@ body {
   text-align: center;
   color: var(--muted);
   font-weight: 600;
-}
-
-.single-lookup-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--surface-subtle);
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.single-lookup-form input {
-  flex: 1;
-  padding: 6px 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: 7px;
-  background: var(--surface);
-  color: var(--text);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
 }
 
 .app-shell {

@@ -59,9 +59,6 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
     undefined
   );
   const [lastCardId, setLastCardId] = useState<string | null>(null);
-  const [lookupInput, setLookupInput] = useState('');
-  const [lookupError, setLookupError] = useState<string | null>(null);
-  const [showLookup, setShowLookup] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [solvedCopied, setSolvedCopied] = useState(false);
@@ -214,19 +211,6 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
     }
 
     await copyFallback(`${shareText} ${shareUrl}`);
-  };
-
-  const handleLookupSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!lookupInput.trim()) return;
-    const err = onLookupCode(lookupInput);
-    if (err) {
-      setLookupError(err);
-    } else {
-      setLookupError(null);
-      setLookupInput('');
-      setShowLookup(false);
-    }
   };
 
   return (
@@ -475,39 +459,12 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
                 <button
                   type="button"
                   className="link-btn-muted"
-                  onClick={() => setShowLookup((s) => !s)}
+                  onClick={() => setShowScanner(true)}
                 >
-                  {showLookup ? 'Close' : 'Load Code'}
+                  Load Code
                 </button>
               </div>
             </div>
-          )}
-
-          {showLookup && (
-            <form onSubmit={handleLookupSubmit} className="single-lookup-form">
-              <input
-                type="text"
-                placeholder="Paste puzzle code or URL"
-                value={lookupInput}
-                onChange={(e) => {
-                  setLookupInput(e.target.value);
-                  if (lookupError) setLookupError(null);
-                }}
-              />
-              <button type="submit" className="btn btn-primary btn-sm">
-                Load
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => setShowScanner(true)}
-              >
-                📷 Scan QR
-              </button>
-              {lookupError && (
-                <p className="error-text full-row">{lookupError}</p>
-              )}
-            </form>
           )}
         </section>
       </div>
@@ -582,11 +539,7 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
 
       {showScanner && (
         <QrScannerModal
-          onDecoded={(raw) => {
-            const err = onLookupCode(raw);
-            if (!err) setShowLookup(false);
-            return err;
-          }}
+          onDecoded={(raw) => onLookupCode(raw)}
           onClose={() => setShowScanner(false)}
         />
       )}

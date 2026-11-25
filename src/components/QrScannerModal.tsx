@@ -22,6 +22,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
     'starting' | 'active' | 'unavailable'
   >('starting');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [manualInput, setManualInput] = useState('');
 
   const handleDecodedText = (text: string) => {
     const err = onDecoded(text);
@@ -30,6 +31,12 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
     } else {
       onClose();
     }
+  };
+
+  const handleManualSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualInput.trim()) return;
+    handleDecodedText(manualInput);
   };
 
   useEffect(() => {
@@ -171,39 +178,39 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
       >
         <div className="modal-header">
           <div className="modal-title-group">
-            <h2>📷 Scan Card QR Code</h2>
+            <h2>Load Puzzle</h2>
           </div>
           <button
             type="button"
             className="modal-close"
             onClick={onClose}
-            aria-label="Close QR scanner"
+            aria-label="Close load puzzle dialog"
           >
             ✕
           </button>
         </div>
 
         <div className="scanner-body">
-          <div
-            className={`scanner-viewport ${
-              cameraState === 'active' ? 'live' : ''
-            }`}
-          >
-            <video
-              ref={videoRef}
-              playsInline
-              muted
-              className="scanner-video"
-            />
-            {cameraState === 'active' && <div className="scanner-reticle" />}
-            {cameraState === 'starting' && (
-              <div className="scanner-status">Starting camera…</div>
-            )}
-          </div>
+          {cameraState !== 'unavailable' && (
+            <div
+              className={`scanner-viewport ${
+                cameraState === 'active' ? 'live' : ''
+              }`}
+            >
+              <video
+                ref={videoRef}
+                playsInline
+                muted
+                className="scanner-video"
+              />
+              {cameraState === 'active' && <div className="scanner-reticle" />}
+              {cameraState === 'starting' && (
+                <div className="scanner-status">Starting camera…</div>
+              )}
+            </div>
+          )}
 
           <canvas ref={canvasRef} style={{ display: 'none' }} />
-
-          {errorMsg && <p className="scanner-note">{errorMsg}</p>}
 
           <input
             ref={fileInputRef}
@@ -215,11 +222,37 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
           />
           <button
             type="button"
-            className="btn btn-primary full-width"
+            className="btn btn-secondary full-width"
             onClick={() => fileInputRef.current?.click()}
           >
             📸 Take / Upload QR Photo
           </button>
+
+          <div className="scanner-divider">
+            <span>or paste code / link</span>
+          </div>
+
+          <form onSubmit={handleManualSubmit} className="scanner-manual-form">
+            <input
+              type="text"
+              placeholder="Paste puzzle code or Car Jam URL"
+              value={manualInput}
+              onChange={(e) => {
+                setManualInput(e.target.value);
+                if (errorMsg) setErrorMsg(null);
+              }}
+              aria-label="Puzzle code or URL"
+            />
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={!manualInput.trim()}
+            >
+              Load
+            </button>
+          </form>
+
+          {errorMsg && <p className="scanner-note">{errorMsg}</p>}
         </div>
       </div>
     </div>
