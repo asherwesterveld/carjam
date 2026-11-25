@@ -136,6 +136,19 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
     onOpenSolution(card);
   };
 
+  const getSolvedScreenNote = (): string | null => {
+    if (viewedSolution && hintsUsed > 0) {
+      return `👀 Peeked at solution · 💡 ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'} used`;
+    }
+    if (viewedSolution) {
+      return `👀 Peeked at the solution first`;
+    }
+    if (hintsUsed > 0) {
+      return `💡 Used ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'}`;
+    }
+    return null;
+  };
+
   const getSneakyRemark = (): string | null => {
     if (viewedSolution && hintsUsed > 0) {
       return `don't worry, I cheated and looked at the solution first (and used ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'}) 👀`;
@@ -393,7 +406,9 @@ export const SingleCardMode: React.FC<SingleCardModeProps> = ({
                       )}
                     </p>
                     {(hintsUsed > 0 || viewedSolution) && (
-                      <p className="solved-sneaky">{getSneakyRemark()}</p>
+                      <div className="solved-sneaky-pill">
+                        {getSolvedScreenNote()}
+                      </div>
                     )}
                   </div>
                 </div>
